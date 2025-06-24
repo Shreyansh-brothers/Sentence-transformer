@@ -1,0 +1,2 @@
+joblib.dump(model, r"D:\Python_files\models\sentiment_model.pkl")
+joblib.dump(vectorizer, r"D:\Python_files\models\tfidf_vectorizer.pkl")
