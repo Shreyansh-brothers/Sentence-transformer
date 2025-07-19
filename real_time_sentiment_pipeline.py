@@ -31,16 +31,15 @@ try:
 
 
     SBERT_AVAILABLE = True
-
 except ImportError:
-    print("⚠️  sentence-transformers not available. Install with: pip install sentence-transformers")
+    print("⚠️ sentence-transformers not available. Install with: pip install sentence-transformers")
     SBERT_AVAILABLE = False
 
 
     class SBERTTransformer:
         def __init__(self, model_name='all-MiniLM-L6-v2'):
             self.model_name = model_name
-            print(f"⚠️  SBERTTransformer created but sentence-transformers not available")
+            print(f"⚠️ SBERTTransformer created but sentence-transformers not available")
 
         def transform(self, sentences):
             raise ImportError("sentence-transformers not installed")
@@ -50,7 +49,7 @@ except ImportError:
 
 
 class EnhancedSwingTradingSystem:
-    """🚀 Enhanced Swing Trading System for Indian Markets"""
+    """🚀 Enhanced Swing Trading System for Indian Markets with Budget & Risk Management"""
 
     def __init__(self, model_path="D:/Python_files/models/sentiment_pipeline.joblib", news_api_key=None):
         self.sentiment_pipeline = None
@@ -73,22 +72,243 @@ class EnhancedSwingTradingSystem:
         }
 
         if not self.news_api_key:
-            print("⚠️  NEWS_API_KEY not provided. Using sample news for sentiment analysis.")
+            print("⚠️ NEWS_API_KEY not provided. Using sample news for sentiment analysis.")
         else:
             print("✅ News API key available. Will fetch real news articles.")
 
         # Load sentiment model
         self.load_sbert_model(model_path)
 
+        # Initialize comprehensive stock database
+        self.initialize_stock_database()
+
+    def initialize_stock_database(self):
+        """Initialize comprehensive Indian stock database (BSE + NSE)"""
+        self.indian_stocks = {
+            # NIFTY 50 Stocks
+            "RELIANCE": {"name": "Reliance Industries", "sector": "Oil & Gas"},
+            "TCS": {"name": "Tata Consultancy Services", "sector": "Information Technology"},
+            "HDFCBANK": {"name": "HDFC Bank", "sector": "Banking"},
+            "INFY": {"name": "Infosys", "sector": "Information Technology"},
+            "HINDUNILVR": {"name": "Hindustan Unilever", "sector": "Consumer Goods"},
+            "ICICIBANK": {"name": "ICICI Bank", "sector": "Banking"},
+            "KOTAKBANK": {"name": "Kotak Mahindra Bank", "sector": "Banking"},
+            "BAJFINANCE": {"name": "Bajaj Finance", "sector": "Financial Services"},
+            "LT": {"name": "Larsen & Toubro", "sector": "Construction"},
+            "SBIN": {"name": "State Bank of India", "sector": "Banking"},
+            "BHARTIARTL": {"name": "Bharti Airtel", "sector": "Telecommunications"},
+            "ASIANPAINT": {"name": "Asian Paints", "sector": "Consumer Goods"},
+            "MARUTI": {"name": "Maruti Suzuki", "sector": "Automobile"},
+            "TITAN": {"name": "Titan Company", "sector": "Consumer Goods"},
+            "SUNPHARMA": {"name": "Sun Pharmaceutical", "sector": "Pharmaceuticals"},
+            "ULTRACEMCO": {"name": "UltraTech Cement", "sector": "Cement"},
+            "NESTLEIND": {"name": "Nestle India", "sector": "Consumer Goods"},
+            "HCLTECH": {"name": "HCL Technologies", "sector": "Information Technology"},
+            "AXISBANK": {"name": "Axis Bank", "sector": "Banking"},
+            "WIPRO": {"name": "Wipro", "sector": "Information Technology"},
+            "NTPC": {"name": "NTPC", "sector": "Power"},
+            "POWERGRID": {"name": "Power Grid Corporation", "sector": "Power"},
+            "ONGC": {"name": "Oil & Natural Gas Corporation", "sector": "Oil & Gas"},
+            "TECHM": {"name": "Tech Mahindra", "sector": "Information Technology"},
+            "TATASTEEL": {"name": "Tata Steel", "sector": "Steel"},
+            "ADANIENT": {"name": "Adani Enterprises", "sector": "Conglomerate"},
+            "COALINDIA": {"name": "Coal India", "sector": "Mining"},
+            "HINDALCO": {"name": "Hindalco Industries", "sector": "Metals"},
+            "JSWSTEEL": {"name": "JSW Steel", "sector": "Steel"},
+            "BAJAJ-AUTO": {"name": "Bajaj Auto", "sector": "Automobile"},
+            "M&M": {"name": "Mahindra & Mahindra", "sector": "Automobile"},
+            "HEROMOTOCO": {"name": "Hero MotoCorp", "sector": "Automobile"},
+            "GRASIM": {"name": "Grasim Industries", "sector": "Cement"},
+            "SHREECEM": {"name": "Shree Cement", "sector": "Cement"},
+            "EICHERMOT": {"name": "Eicher Motors", "sector": "Automobile"},
+            "UPL": {"name": "UPL Limited", "sector": "Chemicals"},
+            "BPCL": {"name": "Bharat Petroleum", "sector": "Oil & Gas"},
+            "DIVISLAB": {"name": "Divi's Laboratories", "sector": "Pharmaceuticals"},
+            "DRREDDY": {"name": "Dr. Reddy's Laboratories", "sector": "Pharmaceuticals"},
+            "CIPLA": {"name": "Cipla", "sector": "Pharmaceuticals"},
+            "BRITANNIA": {"name": "Britannia Industries", "sector": "Consumer Goods"},
+            "TATACONSUM": {"name": "Tata Consumer Products", "sector": "Consumer Goods"},
+            "IOC": {"name": "Indian Oil Corporation", "sector": "Oil & Gas"},
+            "APOLLOHOSP": {"name": "Apollo Hospitals", "sector": "Healthcare"},
+            "BAJAJFINSV": {"name": "Bajaj Finserv", "sector": "Financial Services"},
+            "HDFCLIFE": {"name": "HDFC Life Insurance", "sector": "Insurance"},
+            "SBILIFE": {"name": "SBI Life Insurance", "sector": "Insurance"},
+            "INDUSINDBK": {"name": "IndusInd Bank", "sector": "Banking"},
+            "ADANIPORTS": {"name": "Adani Ports", "sector": "Infrastructure"},
+            "TATAMOTORS": {"name": "Tata Motors", "sector": "Automobile"},
+            "ITC": {"name": "ITC Limited", "sector": "Consumer Goods"},
+
+            # Additional Mid & Small Cap Stocks
+            "GODREJCP": {"name": "Godrej Consumer Products", "sector": "Consumer Goods"},
+            "COLPAL": {"name": "Colgate-Palmolive India", "sector": "Consumer Goods"},
+            "PIDILITIND": {"name": "Pidilite Industries", "sector": "Chemicals"},
+            "BAJAJHLDNG": {"name": "Bajaj Holdings", "sector": "Financial Services"},
+            "MARICO": {"name": "Marico Limited", "sector": "Consumer Goods"},
+            "DABUR": {"name": "Dabur India", "sector": "Consumer Goods"},
+            "LUPIN": {"name": "Lupin Limited", "sector": "Pharmaceuticals"},
+            "CADILAHC": {"name": "Cadila Healthcare", "sector": "Pharmaceuticals"},
+            "BIOCON": {"name": "Biocon Limited", "sector": "Pharmaceuticals"},
+            "ALKEM": {"name": "Alkem Laboratories", "sector": "Pharmaceuticals"},
+            "TORNTPHARM": {"name": "Torrent Pharmaceuticals", "sector": "Pharmaceuticals"},
+            "AUROPHARMA": {"name": "Aurobindo Pharma", "sector": "Pharmaceuticals"},
+            "MOTHERSUMI": {"name": "Motherson Sumi Systems", "sector": "Automobile"},
+            "BOSCHLTD": {"name": "Bosch Limited", "sector": "Automobile"},
+            "EXIDEIND": {"name": "Exide Industries", "sector": "Automobile"},
+            "ASHOKLEY": {"name": "Ashok Leyland", "sector": "Automobile"},
+            "TVSMOTOR": {"name": "TVS Motor Company", "sector": "Automobile"},
+            "BALKRISIND": {"name": "Balkrishna Industries", "sector": "Automobile"},
+            "MRF": {"name": "MRF Limited", "sector": "Automobile"},
+            "APOLLOTYRE": {"name": "Apollo Tyres", "sector": "Automobile"},
+            "BHARATFORG": {"name": "Bharat Forge", "sector": "Automobile"},
+
+            # Banking & Financial Services
+            "FEDERALBNK": {"name": "Federal Bank", "sector": "Banking"},
+            "BANDHANBNK": {"name": "Bandhan Bank", "sector": "Banking"},
+            "IDFCFIRSTB": {"name": "IDFC First Bank", "sector": "Banking"},
+            "RBLBANK": {"name": "RBL Bank", "sector": "Banking"},
+            "YESBANK": {"name": "Yes Bank", "sector": "Banking"},
+            "PNB": {"name": "Punjab National Bank", "sector": "Banking"},
+            "BANKBARODA": {"name": "Bank of Baroda", "sector": "Banking"},
+            "CANBK": {"name": "Canara Bank", "sector": "Banking"},
+            "UNIONBANK": {"name": "Union Bank of India", "sector": "Banking"},
+            "CHOLAFIN": {"name": "Cholamandalam Investment", "sector": "Financial Services"},
+            "LICHSGFIN": {"name": "LIC Housing Finance", "sector": "Financial Services"},
+            "MANAPPURAM": {"name": "Manappuram Finance", "sector": "Financial Services"},
+            "M&MFIN": {"name": "Mahindra & Mahindra Financial", "sector": "Financial Services"},
+            "SRTRANSFIN": {"name": "Shriram Transport Finance", "sector": "Financial Services"},
+
+            # Information Technology
+            "MINDTREE": {"name": "Mindtree Limited", "sector": "Information Technology"},
+            "LTTS": {"name": "L&T Technology Services", "sector": "Information Technology"},
+            "PERSISTENT": {"name": "Persistent Systems", "sector": "Information Technology"},
+            "CYIENT": {"name": "Cyient Limited", "sector": "Information Technology"},
+            "NIITTECH": {"name": "NIIT Technologies", "sector": "Information Technology"},
+            "ROLTA": {"name": "Rolta India", "sector": "Information Technology"},
+            "HEXATECHNO": {"name": "Hexa Technologies", "sector": "Information Technology"},
+            "COFORGE": {"name": "Coforge Limited", "sector": "Information Technology"},
+
+            # Pharmaceuticals & Healthcare
+            "REDDY": {"name": "Dr. Reddy's Labs", "sector": "Pharmaceuticals"},
+            "GLENMARK": {"name": "Glenmark Pharmaceuticals", "sector": "Pharmaceuticals"},
+            "NATCOPHAR": {"name": "Natco Pharma", "sector": "Pharmaceuticals"},
+            "STRIDES": {"name": "Strides Pharma Science", "sector": "Pharmaceuticals"},
+            "LALPATHLAB": {"name": "Dr. Lal PathLabs", "sector": "Healthcare"},
+            "THYROCARE": {"name": "Thyrocare Technologies", "sector": "Healthcare"},
+            "FORTIS": {"name": "Fortis Healthcare", "sector": "Healthcare"},
+            "MAXHEALTH": {"name": "Max Healthcare", "sector": "Healthcare"},
+            "NARAYANHRD": {"name": "Narayana Hrudayalaya", "sector": "Healthcare"},
+
+            # Metals & Mining
+            "SAIL": {"name": "Steel Authority of India", "sector": "Steel"},
+            "JINDALSTEL": {"name": "Jindal Steel & Power", "sector": "Steel"},
+            "NMDC": {"name": "NMDC Limited", "sector": "Mining"},
+            "MOIL": {"name": "MOIL Limited", "sector": "Mining"},
+            "VEDL": {"name": "Vedanta Limited", "sector": "Metals"},
+            "HINDZINC": {"name": "Hindustan Zinc", "sector": "Metals"},
+            "NATIONALUM": {"name": "National Aluminium", "sector": "Metals"},
+            "RATNAMANI": {"name": "Ratnamani Metals", "sector": "Metals"},
+
+            # Consumer & Retail
+            "DMART": {"name": "Avenue Supermarts", "sector": "Retail"},
+            "TRENT": {"name": "Trent Limited", "sector": "Retail"},
+            "SHOPERSTOP": {"name": "Shoppers Stop", "sector": "Retail"},
+            "PAGEIND": {"name": "Page Industries", "sector": "Textiles"},
+            "RAYMOND": {"name": "Raymond Limited", "sector": "Textiles"},
+            "ADITYANB": {"name": "Aditya Birla Nuvo", "sector": "Consumer Goods"},
+            "VBL": {"name": "Varun Beverages", "sector": "Consumer Goods"},
+            "EMAMILTD": {"name": "Emami Limited", "sector": "Consumer Goods"},
+            "JUBLFOOD": {"name": "Jubilant FoodWorks", "sector": "Consumer Goods"},
+            "WESTLIFE": {"name": "Westlife Development", "sector": "Consumer Goods"},
+
+            # Infrastructure & Construction
+            "LTTS": {"name": "L&T Technology Services", "sector": "Construction"},
+            "IRB": {"name": "IRB Infrastructure", "sector": "Infrastructure"},
+            "GMRINFRA": {"name": "GMR Infrastructure", "sector": "Infrastructure"},
+            "GVK": {"name": "GVK Power & Infrastructure", "sector": "Infrastructure"},
+            "ASHOKA": {"name": "Ashoka Buildcon", "sector": "Construction"},
+            "NCC": {"name": "NCC Limited", "sector": "Construction"},
+            "SOBHA": {"name": "Sobha Limited", "sector": "Real Estate"},
+            "DLF": {"name": "DLF Limited", "sector": "Real Estate"},
+            "GODREJPROP": {"name": "Godrej Properties", "sector": "Real Estate"},
+            "PRESTIGE": {"name": "Prestige Estates", "sector": "Real Estate"},
+            "BRIGADE": {"name": "Brigade Enterprises", "sector": "Real Estate"},
+
+            # Telecommunications & Media
+            "RCOM": {"name": "Reliance Communications", "sector": "Telecommunications"},
+            "IDEA": {"name": "Idea Cellular", "sector": "Telecommunications"},
+            "HATHWAY": {"name": "Hathway Cable", "sector": "Media"},
+            "SITI": {"name": "Siti Networks", "sector": "Media"},
+            "ZEEL": {"name": "Zee Entertainment", "sector": "Media"},
+            "PVRINOX": {"name": "PVR INOX", "sector": "Entertainment"},
+            "TIPS": {"name": "Tips Industries", "sector": "Media"},
+
+            # Power & Energy
+            "TATAPOWER": {"name": "Tata Power", "sector": "Power"},
+            "ADANIPOWER": {"name": "Adani Power", "sector": "Power"},
+            "RPOWER": {"name": "Reliance Power", "sector": "Power"},
+            "TORNTPOWER": {"name": "Torrent Power", "sector": "Power"},
+            "CESC": {"name": "CESC Limited", "sector": "Power"},
+            "NHPC": {"name": "NHPC Limited", "sector": "Power"},
+            "SJVN": {"name": "SJVN Limited", "sector": "Power"},
+            "THERMAX": {"name": "Thermax Limited", "sector": "Power"},
+
+            # Chemicals & Fertilizers
+            "GUJALKALI": {"name": "Gujarat Alkalies", "sector": "Chemicals"},
+            "DEEPAKNTR": {"name": "Deepak Nitrite", "sector": "Chemicals"},
+            "AARTI": {"name": "Aarti Industries", "sector": "Chemicals"},
+            "BALRAMCHIN": {"name": "Balrampur Chini Mills", "sector": "Chemicals"},
+            "GNFC": {"name": "Gujarat Narmada Valley", "sector": "Fertilizers"},
+            "CHAMBAL": {"name": "Chambal Fertilizers", "sector": "Fertilizers"},
+            "COROMANDEL": {"name": "Coromandel International", "sector": "Fertilizers"},
+            "KRIBHCO": {"name": "Krishak Bharati Cooperative", "sector": "Fertilizers"},
+
+            # Aviation & Transportation
+            "INDIGO": {"name": "InterGlobe Aviation", "sector": "Aviation"},
+            "SPICEJET": {"name": "SpiceJet Limited", "sector": "Aviation"},
+            "CONCOR": {"name": "Container Corporation", "sector": "Transportation"},
+            "GESHIP": {"name": "Great Eastern Shipping", "sector": "Transportation"},
+            "ESCORTS": {"name": "Escorts Limited", "sector": "Transportation"},
+
+            # Food & Agriculture
+            "KRBL": {"name": "KRBL Limited", "sector": "Food Processing"},
+            "LTFH": {"name": "L&T Finance Holdings", "sector": "Food Processing"},
+            "ADVENZYMES": {"name": "Advanced Enzymes", "sector": "Food Processing"},
+            "AVANTIFEED": {"name": "Avanti Feeds", "sector": "Food Processing"},
+            "GODREJAGRO": {"name": "Godrej Agrovet", "sector": "Agriculture"},
+
+            # Emerging Sectors
+            "ZOMATO": {"name": "Zomato Limited", "sector": "Technology"},
+            "NYKAA": {"name": "FSN E-Commerce Ventures", "sector": "E-commerce"},
+            "PAYTM": {"name": "One97 Communications", "sector": "Fintech"},
+            "POLICYBZR": {"name": "PB Fintech", "sector": "Fintech"},
+            "CARTRADE": {"name": "CarTrade Tech", "sector": "Technology"},
+            "EASEMYTRIP": {"name": "Easy Trip Planners", "sector": "Travel"},
+            "CLEAN": {"name": "Clean Science Technology", "sector": "Chemicals"},
+            "LICI": {"name": "Life Insurance Corporation", "sector": "Insurance"},
+            "NEWGEN": {"name": "Newgen Software", "sector": "Information Technology"},
+            "ROUTE": {"name": "Route Mobile", "sector": "Technology"}
+        }
+
+        print(f"✅ Initialized database with {len(self.indian_stocks)} Indian stocks")
+
+    def get_all_stock_symbols(self):
+        """Get all stock symbols for analysis"""
+        return list(self.indian_stocks.keys())
+
+    def get_stock_info_from_db(self, symbol):
+        """Get stock information from internal database"""
+        base_symbol = symbol.split('.')[0].upper()
+        return self.indian_stocks.get(base_symbol, {"name": symbol, "sector": "Unknown"})
+
     def load_sbert_model(self, model_path):
         """Load trained SBERT sentiment model"""
         if not SBERT_AVAILABLE:
-            print("⚠️  sentence-transformers not available, using TextBlob fallback")
+            print("⚠️ sentence-transformers not available, using TextBlob fallback")
             self.model_type = "TextBlob"
             return
 
         if not os.path.exists(model_path):
-            print(f"⚠️  SBERT model not found at {model_path}")
+            print(f"⚠️ SBERT model not found at {model_path}")
             print("🔄 Using TextBlob as fallback for sentiment analysis")
             self.model_type = "TextBlob"
             return
@@ -106,7 +326,7 @@ class EnhancedSwingTradingSystem:
                 self.model_loaded = True
                 self.model_type = "SBERT + RandomForest"
             else:
-                print("⚠️  Model components incomplete, using TextBlob fallback")
+                print("⚠️ Model components incomplete, using TextBlob fallback")
                 self.model_type = "TextBlob"
                 self.sentiment_pipeline = None
 
@@ -128,28 +348,23 @@ class EnhancedSwingTradingSystem:
             "information technology": (0.45, 0.55),
             "tech": (0.45, 0.55),
             "it": (0.45, 0.55),
-
             "financial": (0.60, 0.40),  # Finance more technical
             "financial services": (0.60, 0.40),
             "banking": (0.60, 0.40),
             "finance": (0.60, 0.40),
-
             "consumer staples": (0.65, 0.35),
             "staples": (0.65, 0.35),
             "consumer goods": (0.65, 0.35),
             "food & staples retailing": (0.65, 0.35),
-
             "energy": (0.55, 0.45),
             "oil & gas": (0.55, 0.45),
             "utilities": (0.70, 0.30),
             "electric": (0.70, 0.30),
             "power": (0.70, 0.30),
-
             "healthcare": (0.50, 0.50),
             "pharmaceuticals": (0.50, 0.50),
             "health care": (0.50, 0.50),
             "pharma": (0.50, 0.50),
-
             "consumer discretionary": (0.45, 0.55),
             "consumer cyclicals": (0.45, 0.55),
             "retail": (0.45, 0.55),
@@ -160,9 +375,7 @@ class EnhancedSwingTradingSystem:
         for key, weights in weights_map.items():
             if key in sector:
                 tech_weight, sentiment_weight = weights
-                print(
-                    f"⚖️  Swing Trading Weights: {tech_weight * 100:.0f}% Technical, {sentiment_weight * 100:.0f}% Sentiment")
-                return tech_weight, sentiment_weight
+                break
 
         return tech_weight, sentiment_weight
 
@@ -190,7 +403,6 @@ class EnhancedSwingTradingSystem:
         }
 
         symbols_to_try = [f"{symbol}.NS", f"{symbol}.BO", symbol]
-
         if symbol in symbol_mappings:
             symbols_to_try.insert(0, symbol_mappings[symbol])
 
@@ -198,15 +410,12 @@ class EnhancedSwingTradingSystem:
             try:
                 ticker = yf.Ticker(sym)
                 data = ticker.history(period=period)
-
                 if not data.empty and len(data) > 30:  # Need more data for swing trading
                     info = ticker.info
-                    print(f"✅ Successfully fetched data for {sym}")
                     return data, info, sym
             except Exception as e:
                 continue
 
-        print(f"❌ No valid data found for {symbol}")
         return None, None, None
 
     def calculate_bollinger_bands(self, prices, period=20, std_dev=2):
@@ -268,15 +477,13 @@ class EnhancedSwingTradingSystem:
 
         price_range = data['High'].max() - data['Low'].min()
         bin_size = price_range / bins
-
         volume_profile = {}
+
         for i in range(len(data)):
             price = (data['High'].iloc[i] + data['Low'].iloc[i]) / 2
             volume = data['Volume'].iloc[i]
-
             bin_level = int((price - data['Low'].min()) / bin_size)
             bin_level = min(bin_level, bins - 1)
-
             price_level = data['Low'].min() + (bin_level * bin_size)
 
             if price_level not in volume_profile:
@@ -312,8 +519,10 @@ class EnhancedSwingTradingSystem:
 
         exp1 = prices.ewm(span=fast, adjust=False).mean()
         exp2 = prices.ewm(span=slow, adjust=False).mean()
+
         macd_line = exp1 - exp2
         signal_line = macd_line.ewm(span=signal, adjust=False).mean()
+
         return macd_line, signal_line, macd_line - signal_line
 
     def calculate_atr(self, high, low, close, period=14):
@@ -334,36 +543,28 @@ class EnhancedSwingTradingSystem:
             return None
 
         base_symbol = symbol.split('.')[0].upper()
+        stock_info = self.get_stock_info_from_db(base_symbol)
+        company_name = stock_info.get("name", base_symbol)
 
-        company_names = {
-            "RELIANCE": "Reliance Industries", "TCS": "Tata Consultancy Services",
-            "INFY": "Infosys", "HDFCBANK": "HDFC Bank", "BAJFINANCE": "Bajaj Finance",
-            "HINDUNILVR": "Hindustan Unilever", "ICICIBANK": "ICICI Bank",
-            "KOTAKBANK": "Kotak Mahindra Bank", "SBIN": "State Bank of India",
-            "BHARTIARTL": "Bharti Airtel", "LT": "Larsen & Toubro",
-            "MARUTI": "Maruti Suzuki", "ASIANPAINT": "Asian Paints",
-            "HCLTECH": "HCL Technologies", "TITAN": "Titan Company",
-            "SUNPHARMA": "Sun Pharmaceutical", "NTPC": "NTPC Limited",
-            "ONGC": "Oil and Natural Gas Corporation", "ADANIENT": "Adani Enterprises"
-        }
-
-        query = company_names.get(base_symbol, base_symbol)
-        url = f"https://newsapi.org/v2/everything?q={query}+India+stock&apiKey={self.news_api_key}&pageSize={num_articles}&language=en&sortBy=publishedAt"
+        url = f"https://newsapi.org/v2/everything?q={company_name}+India+stock&apiKey={self.news_api_key}&pageSize={num_articles}&language=en&sortBy=publishedAt"
 
         try:
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 articles = [article['title'] for article in data.get('articles', [])]
-                print(f"✅ Fetched {len(articles)} real news articles")
                 return articles
         except Exception as e:
-            print(f"❌ Error fetching news: {str(e)[:50]}...")
+            pass
+
         return None
 
     def get_sample_news(self, symbol):
         """Generate sample news for demonstration"""
-        company_name = symbol.split('.')[0]
+        base_symbol = symbol.split('.')[0]
+        stock_info = self.get_stock_info_from_db(base_symbol)
+        company_name = stock_info.get("name", base_symbol)
+
         return [
             f"{company_name} reports strong quarterly earnings beating estimates",
             f"Analysts upgrade {company_name} target price citing strong fundamentals",
@@ -393,9 +594,7 @@ class EnhancedSwingTradingSystem:
             confidence_scores = np.max(probabilities, axis=1)
 
             return sentiment_labels.tolist(), confidence_scores.tolist()
-
         except Exception as e:
-            print(f"❌ Error in SBERT sentiment analysis: {str(e)}")
             return self.analyze_sentiment_with_textblob(articles)
 
     def analyze_sentiment_with_textblob(self, articles):
@@ -516,7 +715,6 @@ class EnhancedSwingTradingSystem:
         if len(data) >= 50:
             ma_20 = data['Close'].rolling(20).mean().iloc[-1]
             ma_50 = data['Close'].rolling(50).mean().iloc[-1]
-
             if current_price > ma_20 > ma_50:  # Strong uptrend
                 technical_score += 15
             elif current_price > ma_20:  # Above short-term MA
@@ -551,6 +749,7 @@ class EnhancedSwingTradingSystem:
 
         # ===== COMBINE SCORES =====
         final_score = (technical_score * tech_weight) + (sentiment_score * sentiment_weight)
+
         return max(0, min(100, final_score))
 
     def calculate_risk_metrics(self, data):
@@ -622,25 +821,6 @@ class EnhancedSwingTradingSystem:
         # Support and Resistance
         support, resistance = self.calculate_support_resistance(data)
 
-        # Market Timing
-        rsi = self.calculate_rsi(data['Close'])
-        bb_upper, bb_middle, bb_lower = self.calculate_bollinger_bands(data['Close'])
-
-        timing_advice = []
-        if not rsi.empty:
-            current_rsi = rsi.iloc[-1]
-            if current_rsi < 35:
-                timing_advice.append("RSI oversold - good entry opportunity")
-            elif current_rsi > 65:
-                timing_advice.append("RSI overbought - wait for pullback")
-
-        if not bb_upper.empty:
-            bb_position = (current_price - bb_lower.iloc[-1]) / (bb_upper.iloc[-1] - bb_lower.iloc[-1])
-            if bb_position < 0.3:
-                timing_advice.append("Near BB lower band - potential reversal")
-            elif bb_position > 0.7:
-                timing_advice.append("Near BB upper band - potential resistance")
-
         return {
             'entry_signal': entry_signal,
             'entry_strategy': entry_strategy,
@@ -653,386 +833,294 @@ class EnhancedSwingTradingSystem:
             },
             'support': support,
             'resistance': resistance,
-            'timing_advice': timing_advice,
             'holding_period': f"{self.swing_trading_params['min_holding_period']}-{self.swing_trading_params['max_holding_period']} days"
         }
 
-    def get_market_timing_signals(self, data):
-        """Generate market timing signals for swing trading"""
-        signals = []
-
-        # RSI Timing
-        rsi = self.calculate_rsi(data['Close'])
-        if not rsi.empty:
-            current_rsi = rsi.iloc[-1]
-            prev_rsi = rsi.iloc[-2] if len(rsi) > 1 else current_rsi
-
-            if current_rsi < 30 and prev_rsi >= 30:
-                signals.append("🟢 RSI just entered oversold - BUY signal")
-            elif current_rsi > 70 and prev_rsi <= 70:
-                signals.append("🔴 RSI just entered overbought - SELL signal")
-            elif 30 <= current_rsi <= 70:
-                signals.append("🟡 RSI in neutral zone - HOLD")
-
-        # Bollinger Band Timing
-        bb_upper, bb_middle, bb_lower = self.calculate_bollinger_bands(data['Close'])
-        if not bb_upper.empty:
-            current_price = data['Close'].iloc[-1]
-            prev_price = data['Close'].iloc[-2] if len(data) > 1 else current_price
-
-            if prev_price <= bb_lower.iloc[-2] and current_price > bb_lower.iloc[-1]:
-                signals.append("🟢 BB Bounce from lower band - BUY signal")
-            elif prev_price >= bb_upper.iloc[-2] and current_price < bb_upper.iloc[-1]:
-                signals.append("🔴 BB Rejection from upper band - SELL signal")
-            elif bb_lower.iloc[-1] < current_price < bb_upper.iloc[-1]:
-                signals.append("🟡 Price within BB range - NEUTRAL")
-
-        # Stochastic Timing
-        stoch_k, stoch_d = self.calculate_stochastic(data['High'], data['Low'], data['Close'])
-        if not stoch_k.empty and len(stoch_k) > 1:
-            k_curr, k_prev = stoch_k.iloc[-1], stoch_k.iloc[-2]
-            d_curr, d_prev = stoch_d.iloc[-1], stoch_d.iloc[-2]
-
-            if k_prev <= d_prev and k_curr > d_curr and k_curr < 80:
-                signals.append("🟢 Stochastic bullish crossover - BUY signal")
-            elif k_prev >= d_prev and k_curr < d_curr and k_curr > 20:
-                signals.append("🔴 Stochastic bearish crossover - SELL signal")
-
-        # MACD Timing
-        macd_line, signal_line, histogram = self.calculate_macd(data['Close'])
-        if not macd_line.empty and len(macd_line) > 1:
-            macd_curr, macd_prev = macd_line.iloc[-1], macd_line.iloc[-2]
-            signal_curr, signal_prev = signal_line.iloc[-1], signal_line.iloc[-2]
-
-            if macd_prev <= signal_prev and macd_curr > signal_curr:
-                signals.append("🟢 MACD bullish crossover - BUY signal")
-            elif macd_prev >= signal_prev and macd_curr < signal_curr:
-                signals.append("🔴 MACD bearish crossover - SELL signal")
-
-        # Volume Confirmation
-        if 'Volume' in data.columns and len(data) > 20:
-            avg_volume = data['Volume'].rolling(20).mean().iloc[-1]
-            current_volume = data['Volume'].iloc[-1]
-
-            if current_volume > avg_volume * 1.5:
-                signals.append("🟢 High volume confirms move")
-            elif current_volume < avg_volume * 0.7:
-                signals.append("🟡 Low volume - weak confirmation")
-
-        return signals
-
     def analyze_swing_trading_stock(self, symbol, period="6mo"):
-        """Comprehensive swing trading analysis"""
-        print(f"\n🚀 SWING TRADING ANALYSIS: {symbol.upper()}")
-        print("=" * 70)
+        """Comprehensive swing trading analysis for a single stock"""
+        try:
+            # Get stock data
+            data, info, final_symbol = self.get_indian_stock_data(symbol, period)
+            if data is None:
+                return None
 
-        # Get stock data
-        data, info, final_symbol = self.get_indian_stock_data(symbol, period)
-        if data is None:
-            print(f"❌ Could not fetch data for {symbol}")
+            # Extract information
+            stock_info = self.get_stock_info_from_db(symbol)
+            sector = stock_info.get('sector', 'Unknown')
+            company_name = stock_info.get('name', symbol)
+
+            # Current market data
+            current_price = data['Close'].iloc[-1]
+            price_change = data['Close'].iloc[-1] - data['Close'].iloc[-2]
+            price_change_pct = (price_change / data['Close'].iloc[-2]) * 100
+
+            # Technical indicators
+            rsi = self.calculate_rsi(data['Close'])
+            bb_upper, bb_middle, bb_lower = self.calculate_bollinger_bands(data['Close'])
+            stoch_k, stoch_d = self.calculate_stochastic(data['High'], data['Low'], data['Close'])
+            macd_line, signal_line, histogram = self.calculate_macd(data['Close'])
+            support, resistance = self.calculate_support_resistance(data)
+            volume_profile, poc_price = self.calculate_volume_profile(data)
+
+            # Sentiment analysis
+            sentiment_results = self.analyze_news_sentiment(final_symbol)
+
+            # Risk metrics
+            risk_metrics = self.calculate_risk_metrics(data)
+
+            # Swing trading score
+            swing_score = self.calculate_swing_trading_score(data, sentiment_results, sector)
+
+            # Trading plan
+            trading_plan = self.generate_trading_plan(data, swing_score, risk_metrics)
+
+            # Compile results
+            return {
+                'symbol': final_symbol,
+                'company_name': company_name,
+                'sector': sector,
+                'current_price': current_price,
+                'price_change': price_change,
+                'price_change_pct': price_change_pct,
+                'rsi': rsi.iloc[-1] if not rsi.empty else None,
+                'bollinger_bands': {
+                    'upper': bb_upper.iloc[-1] if not bb_upper.empty else None,
+                    'middle': bb_middle.iloc[-1] if not bb_middle.empty else None,
+                    'lower': bb_lower.iloc[-1] if not bb_lower.empty else None,
+                    'position': ((current_price - bb_lower.iloc[-1]) / (
+                                bb_upper.iloc[-1] - bb_lower.iloc[-1])) if not bb_upper.empty else None
+                },
+                'stochastic': {
+                    'k': stoch_k.iloc[-1] if not stoch_k.empty else None,
+                    'd': stoch_d.iloc[-1] if not stoch_d.empty else None
+                },
+                'macd': {
+                    'line': macd_line.iloc[-1] if not macd_line.empty else None,
+                    'signal': signal_line.iloc[-1] if not signal_line.empty else None,
+                    'histogram': histogram.iloc[-1] if not histogram.empty else None
+                },
+                'support_resistance': {
+                    'support': support,
+                    'resistance': resistance,
+                    'distance_to_support': ((current_price - support) / support * 100) if support else None,
+                    'distance_to_resistance': (
+                                (resistance - current_price) / current_price * 100) if resistance else None
+                },
+                'volume_profile': {
+                    'poc_price': poc_price,
+                    'current_vs_poc': ((current_price - poc_price) / poc_price * 100) if poc_price else None
+                },
+                'sentiment': {
+                    'scores': sentiment_results[0],
+                    'articles': sentiment_results[1],
+                    'confidence': sentiment_results[2],
+                    'method': sentiment_results[3],
+                    'source': sentiment_results[4],
+                    'sentiment_summary': {
+                        'positive': sentiment_results[0].count('positive'),
+                        'negative': sentiment_results[0].count('negative'),
+                        'neutral': sentiment_results[0].count('neutral')
+                    }
+                },
+                'risk_metrics': risk_metrics,
+                'swing_score': swing_score,
+                'trading_plan': trading_plan,
+                'model_type': self.model_type,
+                'analysis_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+
+        except Exception as e:
+            print(f"❌ Error analyzing {symbol}: {str(e)}")
             return None
 
-        # Extract information
-        sector = info.get('sector', 'Unknown') if info else 'Unknown'
-        company_name = info.get('shortName', symbol) if info else symbol
-
-        print(f"🏢 Company: {company_name}")
-        print(f"📊 Symbol: {final_symbol}")
-        print(f"🏭 Sector: {sector}")
-
-        # Current market data
-        current_price = data['Close'].iloc[-1]
-        price_change = data['Close'].iloc[-1] - data['Close'].iloc[-2]
-        price_change_pct = (price_change / data['Close'].iloc[-2]) * 100
-
-        print(f"💰 Current Price: ₹{current_price:.2f}")
-        print(f"📈 Price Change: ₹{price_change:.2f} ({price_change_pct:.2f}%)")
-
-        # Technical indicators
-        rsi = self.calculate_rsi(data['Close'])
-        bb_upper, bb_middle, bb_lower = self.calculate_bollinger_bands(data['Close'])
-        stoch_k, stoch_d = self.calculate_stochastic(data['High'], data['Low'], data['Close'])
-        macd_line, signal_line, histogram = self.calculate_macd(data['Close'])
-        support, resistance = self.calculate_support_resistance(data)
-        volume_profile, poc_price = self.calculate_volume_profile(data)
-
-        # Sentiment analysis
-        sentiment_results = self.analyze_news_sentiment(final_symbol)
-
-        # Risk metrics
-        risk_metrics = self.calculate_risk_metrics(data)
-
-        # Swing trading score
-        swing_score = self.calculate_swing_trading_score(data, sentiment_results, sector)
-
-        # Trading plan
-        trading_plan = self.generate_trading_plan(data, swing_score, risk_metrics)
-
-        # Market timing signals
-        timing_signals = self.get_market_timing_signals(data)
-
-        # Compile comprehensive results
-        results = {
-            'symbol': final_symbol,
-            'company_name': company_name,
-            'sector': sector,
-            'current_price': current_price,
-            'price_change': price_change,
-            'price_change_pct': price_change_pct,
-
-            # Technical Indicators
-            'rsi': rsi.iloc[-1] if not rsi.empty else None,
-            'bollinger_bands': {
-                'upper': bb_upper.iloc[-1] if not bb_upper.empty else None,
-                'middle': bb_middle.iloc[-1] if not bb_middle.empty else None,
-                'lower': bb_lower.iloc[-1] if not bb_lower.empty else None,
-                'position': ((current_price - bb_lower.iloc[-1]) / (
-                            bb_upper.iloc[-1] - bb_lower.iloc[-1])) if not bb_upper.empty else None
-            },
-            'stochastic': {
-                'k': stoch_k.iloc[-1] if not stoch_k.empty else None,
-                'd': stoch_d.iloc[-1] if not stoch_d.empty else None
-            },
-            'macd': {
-                'line': macd_line.iloc[-1] if not macd_line.empty else None,
-                'signal': signal_line.iloc[-1] if not signal_line.empty else None,
-                'histogram': histogram.iloc[-1] if not histogram.empty else None
-            },
-            'support_resistance': {
-                'support': support,
-                'resistance': resistance,
-                'distance_to_support': ((current_price - support) / support * 100) if support else None,
-                'distance_to_resistance': ((resistance - current_price) / current_price * 100) if resistance else None
-            },
-            'volume_profile': {
-                'poc_price': poc_price,
-                'current_vs_poc': ((current_price - poc_price) / poc_price * 100) if poc_price else None
-            },
-
-            # Sentiment Analysis
-            'sentiment': {
-                'scores': sentiment_results[0],
-                'articles': sentiment_results[1],
-                'confidence': sentiment_results[2],
-                'method': sentiment_results[3],
-                'source': sentiment_results[4],
-                'sentiment_summary': {
-                    'positive': sentiment_results[0].count('positive'),
-                    'negative': sentiment_results[0].count('negative'),
-                    'neutral': sentiment_results[0].count('neutral')
-                }
-            },
-
-            # Risk Metrics
-            'risk_metrics': risk_metrics,
-
-            # Swing Trading Score
-            'swing_score': swing_score,
-
-            # Trading Plan
-            'trading_plan': trading_plan,
-
-            # Market Timing
-            'timing_signals': timing_signals,
-
-            # Model Info
-            'model_type': self.model_type,
-            'analysis_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        }
-
-        return results
-
-    def print_comprehensive_analysis(self, results):
-        """Print detailed swing trading analysis"""
-        if not results:
-            print("❌ Analysis failed")
-            return
-
-        print(f"\n🎯 SWING TRADING SCORE: {results['swing_score']:.0f}/100")
-        print(f"📊 Risk Level: {results['risk_metrics']['risk_level']}")
-        print(f"🤖 Sentiment Model: {results['model_type']}")
-
-        # Technical Analysis Section
-        print(f"\n📈 TECHNICAL ANALYSIS")
-        print("-" * 50)
-
-        if results['rsi']:
-            rsi_status = "OVERSOLD" if results['rsi'] < 30 else "OVERBOUGHT" if results['rsi'] > 70 else "NEUTRAL"
-            print(f"RSI (14): {results['rsi']:.1f} - {rsi_status}")
-
-        if results['bollinger_bands']['upper']:
-            bb = results['bollinger_bands']
-            bb_status = "NEAR LOWER" if bb['position'] < 0.3 else "NEAR UPPER" if bb[
-                                                                                      'position'] > 0.7 else "MIDDLE RANGE"
-            print(f"Bollinger Bands: Upper ₹{bb['upper']:.2f}, Middle ₹{bb['middle']:.2f}, Lower ₹{bb['lower']:.2f}")
-            print(f"BB Position: {bb['position']:.2f} - {bb_status}")
-
-        if results['stochastic']['k']:
-            stoch = results['stochastic']
-            stoch_status = "OVERSOLD" if stoch['k'] < 20 else "OVERBOUGHT" if stoch['k'] > 80 else "NEUTRAL"
-            print(f"Stochastic: K={stoch['k']:.1f}, D={stoch['d']:.1f} - {stoch_status}")
-
-        if results['macd']['line']:
-            macd = results['macd']
-            macd_status = "BULLISH" if macd['line'] > macd['signal'] else "BEARISH"
-            print(f"MACD: Line={macd['line']:.4f}, Signal={macd['signal']:.4f} - {macd_status}")
-
-        # Support/Resistance
-        sr = results['support_resistance']
-        print(f"Support: ₹{sr['support']:.2f} (Distance: {sr['distance_to_support']:.1f}%)")
-        print(f"Resistance: ₹{sr['resistance']:.2f} (Distance: {sr['distance_to_resistance']:.1f}%)")
-
-        # Volume Profile
-        vp = results['volume_profile']
-        if vp['poc_price']:
-            print(f"Volume POC: ₹{vp['poc_price']:.2f} (Current vs POC: {vp['current_vs_poc']:.1f}%)")
-
-        # Sentiment Analysis
-        print(f"\n💭 SENTIMENT ANALYSIS ({results['sentiment']['method']})")
-        print("-" * 50)
-        sentiment_summary = results['sentiment']['sentiment_summary']
-        print(
-            f"Positive: {sentiment_summary['positive']}, Negative: {sentiment_summary['negative']}, Neutral: {sentiment_summary['neutral']}")
-        print(f"News Source: {results['sentiment']['source']}")
-
-        # Risk Metrics
-        print(f"\n⚠️  RISK METRICS")
-        print("-" * 50)
-        rm = results['risk_metrics']
-        print(f"Volatility: {rm['volatility'] * 100:.1f}% (Annualized)")
-        print(f"Max Drawdown: {rm['max_drawdown'] * 100:.1f}%")
-        print(f"Sharpe Ratio: {rm['sharpe_ratio']:.2f}")
-        print(f"Value at Risk (95%): {rm['var_95'] * 100:.1f}%")
-        print(f"ATR: ₹{rm['atr']:.2f}")
-
-        # Trading Plan
-        print(f"\n🎯 TRADING PLAN")
-        print("-" * 50)
-        tp = results['trading_plan']
-        print(f"Signal: {tp['entry_signal']}")
-        print(f"Strategy: {tp['entry_strategy']}")
-        print(f"Position Size: {tp['position_size_multiplier']:.2f}x of normal allocation")
-        print(f"Stop Loss: ₹{tp['stop_loss']:.2f}")
-        print(f"Target 1: ₹{tp['targets']['target_1']:.2f} (1.5:1 RR)")
-        print(f"Target 2: ₹{tp['targets']['target_2']:.2f} (2.5:1 RR)")
-        print(f"Target 3: ₹{tp['targets']['target_3']:.2f} (4.0:1 RR)")
-        print(f"Holding Period: {tp['holding_period']}")
-
-        # Market Timing Signals
-        print(f"\n⏰ MARKET TIMING SIGNALS")
-        print("-" * 50)
-        for signal in results['timing_signals']:
-            print(f"  {signal}")
-
-        if not results['timing_signals']:
-            print("  No clear timing signals at the moment")
-
-        # Recent News Headlines
-        print(f"\n📰 RECENT NEWS SENTIMENT")
-        print("-" * 50)
-        for i, article in enumerate(results['sentiment']['articles'][:8], 1):
-            sentiment = results['sentiment']['scores'][i - 1]
-            confidence = results['sentiment']['confidence'][i - 1]
-            emoji = "🟢" if sentiment == 'positive' else "🔴" if sentiment == 'negative' else "🟡"
-            print(f"  {i}. {emoji} [{sentiment.upper()} {confidence:.2f}] {article[:80]}...")
-
-        # Investment Recommendation
-        print(f"\n🏆 FINAL RECOMMENDATION")
-        print("=" * 50)
-
-        if results['swing_score'] >= 75:
-            print("🟢 STRONG BUY - Excellent swing trading opportunity")
-            print("   Multiple technical indicators align with positive sentiment")
-        elif results['swing_score'] >= 60:
-            print("🟢 BUY - Good swing trading setup")
-            print("   Favorable technical setup with decent risk-reward ratio")
-        elif results['swing_score'] >= 45:
-            print("🟡 HOLD/WATCH - Wait for better entry")
-            print("   Mixed signals, monitor for clearer direction")
-        elif results['swing_score'] >= 30:
-            print("🔴 SELL - Negative outlook")
-            print("   Technical and sentiment indicators suggest downside risk")
-        else:
-            print("🔴 STRONG SELL - Avoid or exit positions")
-            print("   Multiple negative indicators, high risk scenario")
-
-    def analyze_multiple_stocks(self, symbols, period="6mo"):
-        """Analyze multiple stocks and rank them for swing trading"""
-        print(f"\n🎯 SWING TRADING PORTFOLIO ANALYSIS")
-        print("=" * 70)
-
+    def analyze_multiple_stocks(self, symbols, period="6mo", max_concurrent=10):
+        """Analyze multiple stocks with progress tracking"""
         results = []
+        total_stocks = len(symbols)
 
-        for symbol in symbols:
-            print(f"\n🔍 Analyzing {symbol}...")
+        print(f"🔍 Analyzing {total_stocks} stocks...")
+
+        for i, symbol in enumerate(symbols, 1):
+            if i % 10 == 0:
+                print(f"Progress: {i}/{total_stocks} stocks analyzed ({i / total_stocks * 100:.0f}%)")
+
             try:
                 analysis = self.analyze_swing_trading_stock(symbol, period)
-                if analysis:
+                if analysis and analysis['swing_score'] > 0:
                     results.append(analysis)
             except Exception as e:
-                print(f"❌ Error analyzing {symbol}: {e}")
                 continue
 
         # Sort by swing trading score
         results.sort(key=lambda x: x['swing_score'], reverse=True)
 
-        # Print ranking
-        print(f"\n🏆 SWING TRADING RANKINGS")
-        print("=" * 70)
-        print(f"{'Rank':<4} {'Symbol':<12} {'Company':<20} {'Score':<6} {'Signal':<12} {'Risk':<8}")
-        print("-" * 70)
-
-        for i, result in enumerate(results, 1):
-            symbol = result['symbol']
-            company = result['company_name'][:18] + "..." if len(result['company_name']) > 20 else result[
-                'company_name']
-            score = result['swing_score']
-            signal = result['trading_plan']['entry_signal']
-            risk = result['risk_metrics']['risk_level']
-
-            print(f"{i:<4} {symbol:<12} {company:<20} {score:<6.0f} {signal:<12} {risk:<8}")
-
+        print(f"✅ Successfully analyzed {len(results)} stocks out of {total_stocks}")
         return results
 
-    def generate_portfolio_allocation(self, results, total_capital="100000"):
-        """Generate portfolio allocation based on swing trading scores"""
+    def filter_stocks_by_risk_appetite(self, results, risk_appetite):
+        """Filter stocks based on user's risk appetite"""
+        risk_thresholds = {
+            'LOW': 0.25,  # ≤25% volatility
+            'MEDIUM': 0.40,  # ≤40% volatility
+            'HIGH': 1.0  # ≤100% volatility (all stocks)
+        }
+
+        max_volatility = risk_thresholds.get(risk_appetite.upper(), 0.40)
+
+        filtered_stocks = [
+            stock for stock in results
+            if stock['risk_metrics']['volatility'] <= max_volatility and
+               stock['trading_plan']['entry_signal'] in ['BUY', 'STRONG BUY']
+        ]
+
+        return filtered_stocks
+
+    def generate_portfolio_allocation(self, results, total_capital, risk_appetite):
+        """Generate risk-adjusted portfolio allocation"""
+        if not results:
+            print("❌ No suitable stocks found for portfolio creation")
+            return None
+
         print(f"\n💰 PORTFOLIO ALLOCATION (₹{total_capital:,})")
-        print("=" * 70)
-
-        # Filter only BUY signals
-        buy_candidates = [r for r in results if r['trading_plan']['entry_signal'] in ['BUY', 'STRONG BUY']]
-
-        if not buy_candidates:
-            print("❌ No BUY signals found in current analysis")
-            return
+        print("=" * 80)
 
         # Calculate total score for normalization
-        total_score = sum(r['swing_score'] for r in buy_candidates)
+        total_score = sum(r['swing_score'] for r in results)
 
-        print(f"{'Symbol':<12} {'Score':<6} {'Allocation':<12} {'Amount':<12} {'Position Size':<12}")
-        print("-" * 70)
+        portfolio_data = []
 
-        for result in buy_candidates:
+        print(f"{'Rank':<4} {'Symbol':<12} {'Company':<25} {'Score':<6} {'Risk':<8} {'Allocation':<12} {'Amount':<15}")
+        print("-" * 88)
+
+        for i, result in enumerate(results, 1):
             score = result['swing_score']
             allocation_pct = (score / total_score) * 100
-            allocation_amount = total_capital * (allocation_pct / 100)
+            allocation_amount = int(total_capital * (allocation_pct / 100))
 
             # Adjust for position size multiplier
             position_multiplier = result['trading_plan']['position_size_multiplier']
-            adjusted_amount = allocation_amount * position_multiplier
+            adjusted_amount = int(allocation_amount * min(position_multiplier, 2.0))  # Cap at 2x
+
+            company_short = result['company_name'][:23] + "..." if len(result['company_name']) > 25 else result[
+                'company_name']
+            risk_level = result['risk_metrics']['risk_level']
 
             print(
-                f"{result['symbol']:<12} {score:<6.0f} {allocation_pct:<12.1f}% ₹{allocation_amount:<11,.0f} {position_multiplier:<12.2f}x")
+                f"{i:<4} {result['symbol']:<12} {company_short:<25} {score:<6.0f} {risk_level:<8} {allocation_pct:<11.1f}% ₹{adjusted_amount:<14,}")
 
-        # Risk summary
-        total_risk = sum(r['risk_metrics']['volatility'] for r in buy_candidates) / len(buy_candidates)
-        print(f"\n📊 Portfolio Risk Summary:")
-        print(f"   Average Volatility: {total_risk * 100:.1f}%")
-        print(f"   Number of Positions: {len(buy_candidates)}")
-        print(f"   Diversification Score: {min(100, len(buy_candidates) * 20)}/100")
+            portfolio_data.append({
+                'symbol': result['symbol'],
+                'company': result['company_name'],
+                'score': score,
+                'allocation_pct': allocation_pct,
+                'amount': adjusted_amount,
+                'risk_level': risk_level,
+                'sector': result['sector']
+            })
+
+        # Portfolio summary
+        total_allocated = sum([stock['amount'] for stock in portfolio_data])
+        avg_volatility = sum(r['risk_metrics']['volatility'] for r in results) / len(results)
+        avg_score = sum(r['swing_score'] for r in results) / len(results)
+
+        # Sector diversification
+        sector_allocation = {}
+        for stock in portfolio_data:
+            sector = stock['sector']
+            if sector not in sector_allocation:
+                sector_allocation[sector] = 0
+            sector_allocation[sector] += stock['allocation_pct']
+
+        print(f"\n📊 PORTFOLIO SUMMARY")
+        print("-" * 50)
+        print(f"Total Budget: ₹{total_capital:,}")
+        print(f"Total Allocated: ₹{total_allocated:,} ({total_allocated / total_capital * 100:.1f}%)")
+        print(f"Number of Stocks: {len(results)}")
+        print(f"Average Score: {avg_score:.1f}/100")
+        print(f"Average Volatility: {avg_volatility * 100:.1f}%")
+        print(f"Portfolio Risk Level: {risk_appetite}")
+
+        print(f"\n🏭 SECTOR DIVERSIFICATION")
+        print("-" * 30)
+        for sector, allocation in sorted(sector_allocation.items(), key=lambda x: x[1], reverse=True):
+            print(f"{sector}: {allocation:.1f}%")
+
+        return portfolio_data
+
+    def get_single_best_recommendation(self, results):
+        """Get detailed recommendation for the single best stock"""
+        if not results:
+            return None
+
+        best_stock = results[0]  # Highest scoring stock
+
+        print(f"\n🏆 SINGLE BEST STOCK RECOMMENDATION")
+        print("=" * 70)
+
+        print(f"🏢 Company: {best_stock['company_name']}")
+        print(f"📊 Symbol: {best_stock['symbol']}")
+        print(f"🏭 Sector: {best_stock['sector']}")
+        print(f"🎯 Swing Score: {best_stock['swing_score']:.0f}/100")
+        print(f"💰 Current Price: ₹{best_stock['current_price']:.2f}")
+        print(f"📈 Price Change: ₹{best_stock['price_change']:.2f} ({best_stock['price_change_pct']:.2f}%)")
+        print(f"⚠️ Risk Level: {best_stock['risk_metrics']['risk_level']}")
+
+        # Trading recommendation
+        tp = best_stock['trading_plan']
+        print(f"\n🎯 TRADING RECOMMENDATION")
+        print("-" * 30)
+        print(f"Signal: {tp['entry_signal']}")
+        print(f"Strategy: {tp['entry_strategy']}")
+        print(f"Stop Loss: ₹{tp['stop_loss']:.2f}")
+        print(f"Target 1: ₹{tp['targets']['target_1']:.2f}")
+        print(f"Target 2: ₹{tp['targets']['target_2']:.2f}")
+        print(f"Target 3: ₹{tp['targets']['target_3']:.2f}")
+        print(f"Holding Period: {tp['holding_period']}")
+
+        # Key technical levels
+        print(f"\n📊 KEY LEVELS")
+        print("-" * 15)
+        print(f"Support: ₹{tp['support']:.2f}")
+        print(f"Resistance: ₹{tp['resistance']:.2f}")
+        if best_stock['rsi']:
+            print(f"RSI: {best_stock['rsi']:.1f}")
+
+        # Sentiment summary
+        sentiment = best_stock['sentiment']['sentiment_summary']
+        print(f"\n💭 SENTIMENT OVERVIEW")
+        print("-" * 20)
+        print(f"Positive: {sentiment['positive']}, Negative: {sentiment['negative']}, Neutral: {sentiment['neutral']}")
+
+        return best_stock
+
+    def print_analysis_summary(self, all_results, filtered_results, risk_appetite, total_budget):
+        """Print comprehensive analysis summary"""
+        print(f"\n📈 MARKET ANALYSIS SUMMARY")
+        print("=" * 50)
+        print(f"Total Stocks Analyzed: {len(all_results)}")
+        print(f"Risk Appetite: {risk_appetite}")
+        print(f"Budget: ₹{total_budget:,}")
+        print(f"Suitable Stocks Found: {len(filtered_results)}")
+
+        if len(all_results) > 0:
+            avg_market_score = sum(r['swing_score'] for r in all_results) / len(all_results)
+            print(f"Average Market Score: {avg_market_score:.1f}/100")
+
+            # Risk distribution
+            risk_distribution = {'LOW': 0, 'MEDIUM': 0, 'HIGH': 0}
+            for result in all_results:
+                risk_level = result['risk_metrics']['risk_level']
+                risk_distribution[risk_level] += 1
+
+            print(f"\n⚠️ MARKET RISK DISTRIBUTION")
+            print("-" * 25)
+            for risk, count in risk_distribution.items():
+                percentage = (count / len(all_results)) * 100
+                print(f"{risk} Risk: {count} stocks ({percentage:.1f}%)")
 
 
-# Example usage and testing
+# ========================= MAIN EXECUTION =========================
+
 if __name__ == "__main__":
     # Initialize the enhanced swing trading system
     swing_trader = EnhancedSwingTradingSystem(
@@ -1040,64 +1128,184 @@ if __name__ == "__main__":
         news_api_key=os.getenv("NEWS_API_KEY")
     )
 
-    print("🚀 Enhanced Swing Trading System Demo")
-    print("This system adds:")
-    print("• Bollinger Bands analysis")
-    print("• Stochastic oscillator")
-    print("• Support/Resistance levels")
-    print("• Volume profile analysis")
-    print("• Risk management metrics")
-    print("• Complete trading plans")
-    print("• Market timing advice")
+    print("🚀 ENHANCED SWING TRADING SYSTEM")
+    print("Advanced Portfolio Creation with Budget & Risk Management")
+    print("=" * 70)
 
-    # Test with popular Indian stocks
-    test_stocks = ["RELIANCE", "TCS", "INFY", "HDFCBANK", "BAJFINANCE"]
+    # ===== USER INPUT COLLECTION =====
 
-    print(f"\n🎯 Demo: Single Stock Analysis")
-    print("=" * 50)
+    # Get user budget
+    while True:
+        try:
+            budget_input = input("\n💰 Enter your total investment budget in INR (e.g., 500000): ").strip()
+            total_budget = float(budget_input)
+            if total_budget <= 0:
+                print("❌ Please enter a positive number for budget.")
+                continue
+            break
+        except ValueError:
+            print("❌ Invalid input. Please enter a numeric value.")
 
-    # Single stock detailed analysis
-    demo_stock = "RELIANCE"
-    results = swing_trader.analyze_swing_trading_stock(demo_stock)
-    if results:
-        swing_trader.print_comprehensive_analysis(results)
+    # Get user risk appetite
+    risk_levels = ['LOW', 'MEDIUM', 'HIGH']
+    print(f"\n⚠️ Risk Appetite Options:")
+    print("• LOW: Conservative (≤25% volatility) - Blue chip stocks")
+    print("• MEDIUM: Balanced (≤40% volatility) - Mixed portfolio")
+    print("• HIGH: Aggressive (≤100% volatility) - All opportunities")
 
-    print(f"\n🎯 Demo: Multiple Stock Ranking")
-    print("=" * 50)
+    while True:
+        risk_appetite = input("\nEnter your risk appetite (LOW/MEDIUM/HIGH): ").upper().strip()
+        if risk_appetite not in risk_levels:
+            print("❌ Invalid risk level. Please enter LOW, MEDIUM, or HIGH.")
+        else:
+            break
 
-    # Multiple stock analysis and ranking
-    portfolio_results = swing_trader.analyze_multiple_stocks(test_stocks)
+    print(f"\n✅ Configuration Set:")
+    print(f"Budget: ₹{total_budget:,.0f}")
+    print(f"Risk Appetite: {risk_appetite}")
 
-    # Generate portfolio allocation
-    swing_trader.generate_portfolio_allocation(portfolio_results, total_capital=500000)
+    # ===== COMPREHENSIVE MARKET ANALYSIS =====
 
-    # Interactive mode
-    print(f"\n🎮 Interactive Mode")
-    print("Commands:")
+    print(f"\n🔍 ANALYZING INDIAN STOCK MARKET...")
+    print(f"Scanning {len(swing_trader.get_all_stock_symbols())} stocks across BSE & NSE")
+    print("This may take several minutes...")
+
+    # Get all stock symbols from database
+    all_symbols = swing_trader.get_all_stock_symbols()
+
+    # For demo purposes, you can limit the analysis to top stocks
+    # Remove this limitation for full market analysis
+    # top_symbols = all_symbols[:50]  # Analyze top 50 stocks for demo
+    # print(f"Demo mode: Analyzing top {len(top_symbols)} stocks")
+
+    # Analyze all stocks (or top_symbols for demo)
+    start_time = datetime.now()
+    all_results = swing_trader.analyze_multiple_stocks(all_symbols)  # Use all_symbols for full analysis
+    analysis_time = datetime.now() - start_time
+
+    print(f"⏱️ Analysis completed in {analysis_time.total_seconds():.0f} seconds")
+
+    # ===== RISK-BASED FILTERING =====
+
+    print(f"\n🎯 FILTERING STOCKS BY RISK APPETITE...")
+    filtered_results = swing_trader.filter_stocks_by_risk_appetite(all_results, risk_appetite)
+
+    if not filtered_results:
+        print(f"\n❌ No suitable stocks found matching your criteria:")
+        print(f"• Risk Appetite: {risk_appetite}")
+        print(f"• Minimum Signal: BUY or STRONG BUY")
+        print("\n💡 Suggestions:")
+        print("• Consider increasing your risk tolerance")
+        print("• Try a different time period")
+        print("• Check market conditions")
+    else:
+        # ===== PORTFOLIO CREATION =====
+
+        print(f"\n✅ Found {len(filtered_results)} suitable investment opportunities")
+
+        # Generate portfolio allocation
+        portfolio = swing_trader.generate_portfolio_allocation(
+            filtered_results,
+            int(total_budget),
+            risk_appetite
+        )
+
+        # ===== SINGLE BEST RECOMMENDATION =====
+
+        best_stock = swing_trader.get_single_best_recommendation(filtered_results)
+
+        # ===== COMPREHENSIVE SUMMARY =====
+
+        swing_trader.print_analysis_summary(all_results, filtered_results, risk_appetite, total_budget)
+
+        # ===== DETAILED RANKINGS =====
+
+        print(f"\n🏆 TOP 10 STOCK RANKINGS")
+        print("=" * 70)
+        print(f"{'Rank':<4} {'Symbol':<12} {'Company':<20} {'Score':<6} {'Signal':<12} {'Risk':<8}")
+        print("-" * 70)
+
+        for i, result in enumerate(filtered_results[:10], 1):
+            company_short = result['company_name'][:18] + "..." if len(result['company_name']) > 20 else result[
+                'company_name']
+            print(
+                f"{i:<4} {result['symbol']:<12} {company_short:<20} {result['swing_score']:<6.0f} {result['trading_plan']['entry_signal']:<12} {result['risk_metrics']['risk_level']:<8}")
+
+    # ===== INTERACTIVE MODE =====
+
+    # ===== INTERACTIVE MODE ===== (Replace your existing interactive section)
+
+    print(f"\n🎮 INTERACTIVE MODE")
+    print("Available commands:")
     print("• Enter stock symbol for detailed analysis")
-    print("• Type 'portfolio' to analyze multiple stocks")
+    print("• Type 'portfolio' for portfolio analysis")
+    print("• Type 'full' for complete 174-stock analysis")
+    print("• Type 'settings' to change budget/risk settings")
     print("• Type 'quit' to exit")
 
     while True:
         try:
-            user_input = input("\nEnter command: ").strip()
+            user_input = input("\n> Enter command: ").strip()
 
-            if user_input.lower() in ['quit', 'exit']:
-                print("👋 Happy Trading!")
+            if user_input.lower() in ['quit', 'exit', 'q']:
+                print("👋 Thank you for using Enhanced Swing Trading System!")
+                print("Happy Trading! 📈")
                 break
+
+            elif user_input.lower() == 'full':
+                # Complete analysis of all 174 stocks
+                print(f"🚀 COMPLETE MARKET ANALYSIS")
+                print(f"Analyzing all {len(swing_trader.get_all_stock_symbols())} stocks...")
+                print("⏱️ Estimated time: 5-10 minutes")
+
+                confirm = input("Continue with full analysis? (y/n): ")
+                if confirm.lower() == 'y':
+                    all_symbols = swing_trader.get_all_stock_symbols()
+                    complete_results = swing_trader.analyze_multiple_stocks(all_symbols)
+                    complete_filtered = swing_trader.filter_stocks_by_risk_appetite(complete_results, risk_appetite)
+
+                    if complete_filtered:
+                        print(f"\n🎯 COMPLETE MARKET PORTFOLIO")
+                        swing_trader.generate_portfolio_allocation(complete_filtered, int(total_budget), risk_appetite)
+                        swing_trader.get_single_best_recommendation(complete_filtered)
+                    else:
+                        print("No suitable stocks found matching your criteria")
+
             elif user_input.lower() == 'portfolio':
-                symbols = input("Enter stock symbols (comma-separated): ").strip().split(',')
-                symbols = [s.strip().upper() for s in symbols if s.strip()]
-                if symbols:
-                    portfolio_results = swing_trader.analyze_multiple_stocks(symbols)
-                    swing_trader.generate_portfolio_allocation(portfolio_results)
-            elif user_input:
-                results = swing_trader.analyze_swing_trading_stock(user_input)
-                if results:
-                    swing_trader.print_comprehensive_analysis(results)
+                symbols = input("Enter stock symbols (comma-separated) or 'all' for analysis: ").strip()
+
+                if symbols.lower() == 'all':
+                    print(f"\n📊 Analysis Options:")
+                    print(f"1. Quick (30 stocks) - 1-2 minutes")
+                    print(f"2. Extended (100 stocks) - 3-5 minutes")
+                    print(f"3. Complete ({len(swing_trader.get_all_stock_symbols())} stocks) - 5-10 minutes")
+
+                    choice = input("Select option (1/2/3): ").strip()
+
+                    if choice == '1':
+                        symbols_list = swing_trader.get_all_stock_symbols()[:30]
+                    elif choice == '2':
+                        symbols_list = swing_trader.get_all_stock_symbols()[:100]
+                    else:  # choice == '3' or default
+                        symbols_list = swing_trader.get_all_stock_symbols()
+                else:
+                    symbols_list = [s.strip().upper() for s in symbols.split(',') if s.strip()]
+
+                if symbols_list:
+                    interactive_results = swing_trader.analyze_multiple_stocks(symbols_list)
+                    filtered_interactive = swing_trader.filter_stocks_by_risk_appetite(interactive_results,
+                                                                                       risk_appetite)
+                    if filtered_interactive:
+                        swing_trader.generate_portfolio_allocation(filtered_interactive, int(total_budget),
+                                                                   risk_appetite)
+                    else:
+                        print("No suitable stocks found in your selection")
+
+            # ... rest of your interactive mode code remains the same
 
         except KeyboardInterrupt:
-            print("\n👋 Happy Trading!")
+            print("\n👋 Thank you for using Enhanced Swing Trading System!")
+            print("Happy Trading! 📈")
             break
         except Exception as e:
             print(f"❌ Error: {e}")
