@@ -1,0 +1,16 @@
+{
+  "total_extracted": 2,
+  "companies_covered": 1,
+  "years_covered": [
+    "2023",
+    "2024"
+  ],
+  "sectors_covered": [
+    "IT & Software"
+  ],
+  "avg_confidence": 0.665,
+  "avg_text_length": 8741,
+  "extraction_methods": [
+    "direct_pdf_keyword_section"
+  ]
+}

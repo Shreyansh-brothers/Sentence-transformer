@@ -1,0 +1,28 @@
+2025-08-02 22:24:35,231 - INFO - Selenium WebDriver initialized successfully
+2025-08-02 22:24:35,231 - INFO - Starting Enhanced MD&A Scraper with Working Sources
+2025-08-02 22:24:35,232 - INFO - Scraping verified working TCS reports...
+2025-08-02 22:24:35,232 - INFO - Processing TCS 2024 annual report
+2025-08-02 22:24:45,305 - ERROR - Failed to download PDF https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/2023-24/ar/annual-report-2023-2024.pdf: HTTPSConnectionPool(host='www.tcs.com', port=443): Max retries exceeded with url: /content/dam/tcs/investor-relations/financial-statements/2023-24/ar/annual-report-2023-2024.pdf (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000158ADC72F90>, 'Connection to www.tcs.com timed out. (connect timeout=10)'))
+2025-08-02 22:24:48,333 - INFO - Processing TCS 2023 annual report
+2025-08-02 22:24:52,910 - WARNING - Cannot set gray stroke color because /'P0' is an invalid float value
+2025-08-02 22:24:54,516 - WARNING - Cannot set gray stroke color because /'P0' is an invalid float value
+2025-08-02 22:24:54,516 - WARNING - Cannot set gray stroke color because /'P1' is an invalid float value
+2025-08-02 22:24:54,519 - WARNING - Cannot set gray stroke color because /'P2' is an invalid float value
+2025-08-02 22:24:57,942 - WARNING - Cannot set gray stroke color because /'P0' is an invalid float value
+2025-08-02 22:24:58,763 - WARNING - Cannot set gray stroke color because /'P0' is an invalid float value
+2025-08-02 22:25:06,397 - INFO - Successfully extracted MD&A from TCS 2023
+2025-08-02 22:25:09,398 - INFO - Extracted 1 MD&A sections from TCS
+2025-08-02 22:25:09,398 - INFO - Scraping company investor relations pages...
+2025-08-02 22:25:09,398 - INFO - Scraping Infosys investor relations page
+2025-08-02 22:25:24,488 - ERROR - Error scraping Infosys: HTTPSConnectionPool(host='www.infosys.com', port=443): Max retries exceeded with url: /investors/reports-filings.html (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000158ADC61F90>, 'Connection to www.infosys.com timed out. (connect timeout=15)'))
+2025-08-02 22:25:24,489 - INFO - Scraping HDFC Bank investor relations page
+2025-08-02 22:25:39,740 - INFO - Extracted 0 MD&A sections from IR pages
+2025-08-02 22:25:39,740 - INFO - Scraping Screener.in (fixed)...
+2025-08-02 22:25:39,740 - INFO - Scraping Screener.in for TCS
+2025-08-02 22:25:48,819 - INFO - Scraping Screener.in for Infosys
+2025-08-02 22:25:52,521 - INFO - Extracted 0 MD&A sections from Screener.in
+2025-08-02 22:25:52,522 - INFO - Total unique MD&A sections: 1
+2025-08-02 22:25:52,535 - INFO - Results saved to mda_dataset_enhanced_20250802_222552.csv
+2025-08-02 22:25:52,536 - INFO - Results saved to mda_dataset_enhanced_20250802_222552.json
+2025-08-02 22:25:54,782 - INFO - Selenium driver closed
+2025-08-02 22:25:54,782 - INFO - HTTP session closed

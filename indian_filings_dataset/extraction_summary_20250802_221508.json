@@ -1,0 +1,16 @@
+{
+  "total_extracted": 1,
+  "failed_urls": 2,
+  "companies_covered": 1,
+  "years_covered": [
+    "2024"
+  ],
+  "sectors_covered": [
+    "Banking & Financial Services"
+  ],
+  "avg_confidence": 0.76,
+  "avg_text_length": 17295,
+  "extraction_methods": [
+    "pdf_keyword_section"
+  ]
+}

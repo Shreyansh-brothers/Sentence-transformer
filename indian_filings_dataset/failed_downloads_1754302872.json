@@ -1,0 +1,62 @@
+[
+  {
+    "company": "Reliance Industries",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/relianceindustries (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F2757F0>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "Tata Consultancy Services",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/tataconsultancyservices (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F256210>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "HDFC Bank",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/hdfcbank (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F256850>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "Infosys",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/infosys (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F256C10>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "Hindustan Unilever",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/hindustanunilever (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F256FD0>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "ICICI Bank",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/icicibank (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F257390>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "State Bank of India",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/statebankofindia (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F256FD0>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "Bharti Airtel",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/bhartiairtel (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F256C10>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "ITC",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/itc (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F256710>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "Kotak Mahindra Bank",
+    "source": "Moneycontrol",
+    "error": "HTTPSConnectionPool(host='www.moneycontrol.com', port=443): Max retries exceeded with url: /india/stockpricequote/kotakmahindrabank (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x0000027C3F256990>: Failed to resolve 'www.moneycontrol.com' ([Errno 11002] getaddrinfo failed)\"))"
+  },
+  {
+    "company": "Tata Consultancy Services",
+    "source": "IR Website",
+    "error": "HTTPSConnectionPool(host='www.tcs.com', port=443): Max retries exceeded with url: /investor-relations (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x0000027C3F2560D0>, 'Connection to www.tcs.com timed out. (connect timeout=15)'))"
+  },
+  {
+    "company": "Infosys",
+    "source": "IR Website",
+    "error": "HTTPSConnectionPool(host='www.infosys.com', port=443): Max retries exceeded with url: /investors.html (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x0000027CC16802D0>, 'Connection to www.infosys.com timed out. (connect timeout=15)'))"
+  }
+]
