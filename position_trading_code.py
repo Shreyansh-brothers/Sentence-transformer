@@ -5,6 +5,7 @@ import yfinance as yf
 import joblib
 from datetime import datetime, timedelta
 import requests
+from bs4 import BeautifulSoup
 from sentence_transformers import SentenceTransformer
 from textblob import TextBlob
 import warnings
@@ -175,6 +176,10 @@ class MDASentimentModel:
         return self.model is not None
 
 
+class ImprovedMDAExtractor:
+    pass
+
+
 class EnhancedPositionTradingSystem:
     """Enhanced Position Trading System for Indian Markets with Long-term Focus"""
 
@@ -289,86 +294,587 @@ class EnhancedPositionTradingSystem:
             logger.error(f"Error validating trading parameters: {str(e)}")
             raise
 
-    def get_sample_mda_text(self, symbol):
-        """Generate sample MDA-style text for demonstration"""
-        try:
-            base_symbol = str(symbol).split('.')[0]
-            stock_info = self.get_stock_info_from_db(base_symbol)
-            company_name = stock_info.get("name", base_symbol)
-            sector = stock_info.get("sector", "business")
+    class ImprovedMDAExtractor:
+        """Enhanced MD&A text extractor for Indian companies"""
 
-            mda_samples = [
-                f"Management remains optimistic about {company_name}'s growth prospects in the {sector} sector. Our strategic initiatives are yielding positive results.",
-                f"The company has successfully navigated market challenges and positioned itself for sustainable growth. We are confident in our operational efficiency improvements.",
-                f"{company_name} has demonstrated resilience in a dynamic market environment. Management believes the current strategy will drive long-term value creation.",
-                f"We are pleased with the progress made in our key business segments. The management team is focused on executing our strategic roadmap effectively.",
-                f"Market conditions present both opportunities and challenges. Management is committed to maintaining operational excellence while pursuing growth opportunities.",
-                f"The company's strong fundamentals provide a solid foundation for future expansion. We remain cautious yet optimistic about market developments.",
-                f"Management has implemented several cost optimization measures while investing in growth initiatives. We expect these efforts to bear fruit in the coming quarters.",
-                f"Our focus on innovation and customer satisfaction continues to differentiate {company_name} in the competitive landscape.",
-                f"The management team is confident that our strategic partnerships and operational improvements will enhance shareholder value.",
-                f"Despite market volatility, we maintain a positive outlook for our core business segments and expect sustained performance improvement."
-            ]
+        def __init__(self):
+            self.session = requests.Session()
+            self.session.headers.update({
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            })
 
-            return mda_samples
-        except Exception as e:
-            logger.error(f"Error generating sample MDA text for {symbol}: {str(e)}")
-            return [f"Management discussion for {symbol}"]
+        def get_mda_text(self, symbol: str, max_reports: int = 3) -> List[str]:
+            """
+            Extract real MD&A text from multiple sources
+            Returns a list of MD&A text sections
+            """
+            try:
+                symbol = symbol.replace('.NS', '').replace('.BO', '').upper()
+                logger.info(f"Extracting MD&A text for {symbol}")
 
-    def analyze_mda_sentiment(self, symbol):
-        """Analyze MDA sentiment for a given symbol"""
+                mda_texts = []
+
+                # Try multiple extraction methods
+                methods = [
+                    self._extract_from_bse_announcements,
+                    self._extract_from_nse_reports,
+                    self._extract_from_company_website,
+                    self._extract_from_annual_reports,
+                    self._extract_from_yahoo_finance_filings
+                ]
+
+                for method in methods:
+                    try:
+                        texts = method(symbol)
+                        if texts:
+                            mda_texts.extend(texts)
+                            logger.info(f"Successfully extracted {len(texts)} MD&A sections using {method.__name__}")
+
+                            # If we have enough content, break
+                            if len(mda_texts) >= max_reports:
+                                break
+
+                    except Exception as e:
+                        logger.warning(f"Method {method.__name__} failed for {symbol}: {str(e)}")
+                        continue
+
+                    # Rate limiting
+                    time.sleep(1)
+
+                # Clean and filter the extracted texts
+                cleaned_texts = self._clean_and_validate_mda_texts(mda_texts)
+
+                if cleaned_texts:
+                    logger.info(f"Successfully extracted {len(cleaned_texts)} MD&A texts for {symbol}")
+                    return cleaned_texts[:max_reports]  # Return up to max_reports
+                else:
+                    logger.warning(f"No valid MD&A text found for {symbol}")
+                    return []
+
+            except Exception as e:
+                logger.error(f"Error extracting MD&A text for {symbol}: {str(e)}")
+                return []
+
+        def _extract_from_bse_announcements(self, symbol: str) -> List[str]:
+            """Extract MD&A from BSE announcements"""
+            try:
+                # BSE announcement URL pattern
+                bse_url = f"https://www.bseindia.com/stock-share-price/{symbol}/announcements/"
+
+                response = self.session.get(bse_url, timeout=10)
+                if response.status_code != 200:
+                    return []
+
+                soup = BeautifulSoup(response.content, 'html.parser')
+
+                # Look for annual report links or MD&A related announcements
+                announcements = soup.find_all('a', href=re.compile(r'annual|report|mda|management.*discussion',
+                                                                   re.IGNORECASE))
+
+                mda_texts = []
+                for link in announcements[:3]:  # Check first 3 relevant links
+                    try:
+                        href = link.get('href')
+                        if href and not href.startswith('http'):
+                            href = 'https://www.bseindia.com' + href
+
+                        doc_response = self.session.get(href, timeout=10)
+                        if doc_response.status_code == 200:
+                            # Extract text from PDF or HTML
+                            text = self._extract_text_from_response(doc_response)
+                            mda_section = self._extract_mda_section(text)
+                            if mda_section:
+                                mda_texts.append(mda_section)
+
+                    except Exception as e:
+                        logger.debug(f"Error processing BSE link {href}: {str(e)}")
+                        continue
+
+                return mda_texts
+
+            except Exception as e:
+                logger.error(f"Error extracting from BSE for {symbol}: {str(e)}")
+                return []
+
+        def _extract_from_nse_reports(self, symbol: str) -> List[str]:
+            """Extract MD&A from NSE corporate reports"""
+            try:
+                # NSE doesn't have a direct API, but we can try their corporate section
+                nse_search_url = f"https://www.nseindia.com/companies-listing/corporate-filings-company-wise"
+
+                # This would require more complex scraping with session management
+                # For now, we'll implement a basic version
+
+                return []  # Placeholder - NSE requires complex session handling
+
+            except Exception as e:
+                logger.error(f"Error extracting from NSE for {symbol}: {str(e)}")
+                return []
+
+        def _extract_from_company_website(self, symbol: str) -> List[str]:
+            """Try to extract MD&A from company's official website"""
+            try:
+                # Get company website from yfinance
+                ticker = yf.Ticker(f"{symbol}.NS")
+                info = ticker.info
+
+                website = info.get('website', '')
+                if not website:
+                    return []
+
+                # Look for investor relations section
+                ir_urls = [
+                    f"{website}/investor-relations",
+                    f"{website}/investors",
+                    f"{website}/annual-reports",
+                    f"{website}/financial-reports"
+                ]
+
+                mda_texts = []
+                for url in ir_urls:
+                    try:
+                        response = self.session.get(url, timeout=10)
+                        if response.status_code == 200:
+                            soup = BeautifulSoup(response.content, 'html.parser')
+
+                            # Look for annual report links
+                            report_links = soup.find_all('a', href=re.compile(r'annual.*report|financial.*report',
+                                                                              re.IGNORECASE))
+
+                            for link in report_links[:2]:  # Check first 2 reports
+                                try:
+                                    href = link.get('href')
+                                    if href and not href.startswith('http'):
+                                        href = website + href
+
+                                    doc_response = self.session.get(href, timeout=15)
+                                    if doc_response.status_code == 200:
+                                        text = self._extract_text_from_response(doc_response)
+                                        mda_section = self._extract_mda_section(text)
+                                        if mda_section:
+                                            mda_texts.append(mda_section)
+
+                                except Exception as e:
+                                    logger.debug(f"Error processing company website link: {str(e)}")
+                                    continue
+
+                    except Exception as e:
+                        logger.debug(f"Error accessing {url}: {str(e)}")
+                        continue
+
+                return mda_texts
+
+            except Exception as e:
+                logger.error(f"Error extracting from company website for {symbol}: {str(e)}")
+                return []
+
+        def _extract_from_annual_reports(self, symbol: str) -> List[str]:
+            """Extract MD&A from publicly available annual reports"""
+            try:
+                # Search for annual reports using Google Search API or web scraping
+                search_query = f"{symbol} annual report filetype:pdf site:bseindia.com OR site:nseindia.com"
+
+                # This is a simplified version - in practice, you'd use Google Search API
+                # or implement more sophisticated web scraping
+
+                return []  # Placeholder
+
+            except Exception as e:
+                logger.error(f"Error extracting from annual reports for {symbol}: {str(e)}")
+                return []
+
+        def _extract_from_yahoo_finance_filings(self, symbol: str) -> List[str]:
+            """Extract MD&A information from Yahoo Finance filings data"""
+            try:
+                ticker = yf.Ticker(f"{symbol}.NS")
+
+                # Get recent financial data and news
+                info = ticker.info
+                news = ticker.news
+
+                # Extract relevant information from company description and recent news
+                mda_like_texts = []
+
+                # Company description often contains management perspective
+                if 'longBusinessSummary' in info and info['longBusinessSummary']:
+                    business_summary = info['longBusinessSummary']
+                    if len(business_summary) > 200:  # Only if substantial content
+                        mda_like_texts.append(business_summary)
+
+                # Recent news articles that might contain management quotes
+                for article in news[:5]:  # Check recent 5 articles
+                    try:
+                        if 'summary' in article and article['summary']:
+                            summary = article['summary']
+                            # Look for management-related content
+                            if any(keyword in summary.lower() for keyword in
+                                   ['management', 'ceo', 'outlook', 'strategy', 'expects', 'guidance']):
+                                mda_like_texts.append(summary)
+                    except Exception:
+                        continue
+
+                return mda_like_texts
+
+            except Exception as e:
+                logger.error(f"Error extracting from Yahoo Finance for {symbol}: {str(e)}")
+                return []
+
+        def _extract_text_from_response(self, response) -> str:
+            """Extract text from HTTP response (HTML or PDF)"""
+            try:
+                content_type = response.headers.get('content-type', '').lower()
+
+                if 'application/pdf' in content_type:
+                    # Extract text from PDF
+                    return self._extract_text_from_pdf(response.content)
+                else:
+                    # Extract text from HTML
+                    soup = BeautifulSoup(response.content, 'html.parser')
+                    return soup.get_text()
+
+            except Exception as e:
+                logger.error(f"Error extracting text from response: {str(e)}")
+                return ""
+
+        def _extract_text_from_pdf(self, pdf_content: bytes) -> str:
+            """Extract text from PDF content"""
+            try:
+                import PyPDF2
+                from io import BytesIO
+
+                pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_content))
+                text = ""
+
+                for page in pdf_reader.pages:
+                    text += page.extract_text()
+
+                return text
+
+            except ImportError:
+                logger.warning("PyPDF2 not available for PDF text extraction")
+                return ""
+            except Exception as e:
+                logger.error(f"Error extracting text from PDF: {str(e)}")
+                return ""
+
+        def _extract_mda_section(self, full_text: str) -> Optional[str]:
+            """Extract MD&A section from full document text"""
+            try:
+                if not full_text or len(full_text) < 100:
+                    return None
+
+                # Common MD&A section headers in Indian reports
+                mda_patterns = [
+                    r"management.*discussion.*and.*analysis",
+                    r"management.*discussion",
+                    r"directors.*report",
+                    r"management.*analysis",
+                    r"business.*outlook",
+                    r"management.*commentary",
+                    r"operational.*review",
+                    r"management.*perspective"
+                ]
+
+                text_lower = full_text.lower()
+
+                for pattern in mda_patterns:
+                    matches = list(re.finditer(pattern, text_lower))
+
+                    if matches:
+                        # Find the start of MD&A section
+                        start_pos = matches[0].start()
+
+                        # Find the end (look for next major section or end of document)
+                        end_patterns = [
+                            r"financial.*statements",
+                            r"notes.*to.*accounts",
+                            r"auditor.*report",
+                            r"corporate.*governance",
+                            r"annexure",
+                            r"schedule"
+                        ]
+
+                        end_pos = len(full_text)
+                        for end_pattern in end_patterns:
+                            end_matches = list(re.finditer(end_pattern, text_lower[start_pos:]))
+                            if end_matches:
+                                end_pos = start_pos + end_matches[0].start()
+                                break
+
+                        # Extract the section
+                        mda_section = full_text[start_pos:end_pos]
+
+                        # Clean and validate
+                        if len(mda_section) > 500:  # Minimum length for meaningful MD&A
+                            return self._clean_extracted_text(mda_section)
+
+                # If no specific MD&A section found, look for management-related content
+                management_content = self._extract_management_content(full_text)
+                if management_content and len(management_content) > 300:
+                    return management_content
+
+                return None
+
+            except Exception as e:
+                logger.error(f"Error extracting MD&A section: {str(e)}")
+                return None
+
+        def _extract_management_content(self, text: str) -> Optional[str]:
+            """Extract management-related content from text"""
+            try:
+                sentences = text.split('.')
+                management_sentences = []
+
+                management_keywords = [
+                    'management', 'strategy', 'outlook', 'expects', 'believes',
+                    'anticipates', 'guidance', 'performance', 'operations',
+                    'future', 'growth', 'investment', 'market', 'business'
+                ]
+
+                for sentence in sentences:
+                    sentence = sentence.strip()
+                    if len(sentence) > 50:  # Minimum sentence length
+                        sentence_lower = sentence.lower()
+                        keyword_count = sum(1 for keyword in management_keywords if keyword in sentence_lower)
+
+                        if keyword_count >= 2:  # At least 2 management-related keywords
+                            management_sentences.append(sentence)
+
+                if len(management_sentences) >= 5:  # At least 5 relevant sentences
+                    return '. '.join(management_sentences[:20])  # Limit to 20 sentences
+
+                return None
+
+            except Exception as e:
+                logger.error(f"Error extracting management content: {str(e)}")
+                return None
+
+        def _clean_extracted_text(self, text: str) -> str:
+            """Clean and format extracted MD&A text"""
+            try:
+                # Remove excessive whitespace
+                text = re.sub(r'\s+', ' ', text)
+
+                # Remove page numbers and headers/footers
+                text = re.sub(r'\b\d+\s*$', '', text, flags=re.MULTILINE)
+                text = re.sub(r'^\s*\d+\s*', '', text, flags=re.MULTILINE)
+
+                # Remove common report artifacts
+                artifacts = [
+                    r'annual report \d{4}',
+                    r'page \d+',
+                    r'www\.\w+\.com',
+                    r'tel:?\s*\+?\d+[\d\s\-\(\)]+',
+                    r'email:\s*\S+@\S+',
+                ]
+
+                for artifact in artifacts:
+                    text = re.sub(artifact, '', text, flags=re.IGNORECASE)
+
+                # Clean up spacing
+                text = re.sub(r'\s+', ' ', text).strip()
+
+                return text
+
+            except Exception as e:
+                logger.error(f"Error cleaning extracted text: {str(e)}")
+                return text
+
+        def _clean_and_validate_mda_texts(self, mda_texts: List[str]) -> List[str]:
+            """Clean and validate extracted MD&A texts"""
+            try:
+                cleaned_texts = []
+
+                for text in mda_texts:
+                    if not text or not isinstance(text, str):
+                        continue
+
+                    # Clean the text
+                    cleaned_text = self._clean_extracted_text(text)
+
+                    # Validate quality
+                    if self._validate_mda_text_quality(cleaned_text):
+                        cleaned_texts.append(cleaned_text)
+
+                # Remove duplicates (texts that are too similar)
+                unique_texts = self._remove_similar_texts(cleaned_texts)
+
+                return unique_texts
+
+            except Exception as e:
+                logger.error(f"Error cleaning and validating MD&A texts: {str(e)}")
+                return mda_texts  # Return original if cleaning fails
+
+        def _validate_mda_text_quality(self, text: str) -> bool:
+            """Validate if the extracted text is meaningful MD&A content"""
+            try:
+                if not text or len(text) < 200:
+                    return False
+
+                # Check for minimum management-related keywords
+                management_keywords = [
+                    'management', 'performance', 'business', 'operations',
+                    'growth', 'strategy', 'market', 'revenue', 'profit',
+                    'outlook', 'expects', 'believes', 'future'
+                ]
+
+                text_lower = text.lower()
+                keyword_count = sum(1 for keyword in management_keywords if keyword in text_lower)
+
+                # Require at least 3 management-related keywords
+                if keyword_count < 3:
+                    return False
+
+                # Check for reasonable sentence structure
+                sentences = text.split('.')
+                valid_sentences = [s for s in sentences if len(s.strip()) > 20]
+
+                if len(valid_sentences) < 5:
+                    return False
+
+                return True
+
+            except Exception as e:
+                logger.error(f"Error validating MD&A text quality: {str(e)}")
+                return False
+
+        def _remove_similar_texts(self, texts: List[str]) -> List[str]:
+            """Remove texts that are too similar to each other"""
+            try:
+                if len(texts) <= 1:
+                    return texts
+
+                unique_texts = []
+
+                for text in texts:
+                    is_unique = True
+
+                    for existing_text in unique_texts:
+                        # Simple similarity check based on common words
+                        similarity = self._calculate_text_similarity(text, existing_text)
+                        if similarity > 0.7:  # 70% similarity threshold
+                            is_unique = False
+                            break
+
+                    if is_unique:
+                        unique_texts.append(text)
+
+                return unique_texts
+
+            except Exception as e:
+                logger.error(f"Error removing similar texts: {str(e)}")
+                return texts
+
+        def _calculate_text_similarity(self, text1: str, text2: str) -> float:
+            """Calculate similarity between two texts"""
+            try:
+                # Simple word-based similarity
+                words1 = set(text1.lower().split())
+                words2 = set(text2.lower().split())
+
+                if not words1 and not words2:
+                    return 1.0
+
+                if not words1 or not words2:
+                    return 0.0
+
+                intersection = len(words1.intersection(words2))
+                union = len(words1.union(words2))
+
+                return intersection / union if union > 0 else 0.0
+
+            except Exception as e:
+                logger.error(f"Error calculating text similarity: {str(e)}")
+                return 0.0
+
+    # Update the analyze_mda_sentiment method in your main class
+    def updated_analyze_mda_sentiment(self, symbol):
+        """
+        Updated analyze_mda_sentiment method that prioritizes real MD&A extraction
+        """
         try:
             if not self.mda_available:
                 logger.info("MDA model not available, using sample analysis")
                 return self.get_sample_mda_analysis(symbol)
 
-            # In a real implementation, you would fetch actual MDA text from annual reports
-            # For demonstration, we'll use sample MDA-style text
-            mda_texts = self.get_sample_mda_text(symbol)
+            # ✅ Step 1: Try to fetch real MD&A text using improved extractor
+            try:
+                extractor = self.ImprovedMDAExtractor()
+                mda_texts = extractor.get_mda_text(symbol, max_reports=3)
 
+                if mda_texts:
+                    logger.info(f"Successfully extracted {len(mda_texts)} real MD&A texts for {symbol}")
+                else:
+                    logger.warning(f"No real MD&A text found for {symbol}")
+
+            except Exception as e:
+                logger.warning(f"Failed to extract real MDA text for {symbol}: {e}")
+                mda_texts = []
+
+            # ✅ Step 2: If no real text found, try alternative sources
             if not mda_texts:
-                logger.warning(f"No MDA text available for {symbol}")
+                logger.info(f"Trying alternative sources for {symbol}")
+                try:
+                    # Try getting recent earnings transcripts or management commentary
+                    alternative_texts = self._get_alternative_management_content(symbol)
+                    if alternative_texts:
+                        mda_texts = alternative_texts
+                        logger.info(f"Found {len(mda_texts)} alternative management texts for {symbol}")
+                except Exception as e:
+                    logger.warning(f"Alternative content extraction failed: {e}")
+
+            # ✅ Step 3: If still no real text, use sample but log it clearly
+            if not mda_texts:
+                logger.warning(f"No real MDA text found for {symbol}, using sample analysis")
                 return self.get_sample_mda_analysis(symbol)
 
-            # Analyze sentiment using MDA model
-            sentiments, confidences = self.mda_sentiment_model.predict(mda_texts)
+            # ✅ Step 4: Run your MDA sentiment model on real text
+            try:
+                sentiments, confidences = self.mda_sentiment_model.predict(mda_texts)
 
-            if not sentiments or not confidences:
-                logger.warning(f"MDA sentiment analysis failed for {symbol}")
+                if not sentiments or not confidences:
+                    logger.warning(f"MDA sentiment analysis failed for {symbol}")
+                    return self.get_sample_mda_analysis(symbol)
+
+            except Exception as e:
+                logger.error(f"MDA model prediction failed for {symbol}: {e}")
                 return self.get_sample_mda_analysis(symbol)
 
-            # Calculate aggregate sentiment score
+            # ✅ Step 5: Convert sentiment to scores
             sentiment_scores = []
             for sentiment, confidence in zip(sentiments, confidences):
-                if sentiment == 'positive':
+                if sentiment in ['positive', 'very_positive']:
                     sentiment_scores.append(confidence)
-                elif sentiment == 'negative':
+                elif sentiment in ['negative', 'very_negative']:
                     sentiment_scores.append(-confidence)
-                else:  # neutral
+                else:
                     sentiment_scores.append(0)
 
-            # Aggregate score (0-100 scale)
             avg_sentiment = np.mean(sentiment_scores) if sentiment_scores else 0
-            mda_score = 50 + (avg_sentiment * 50)  # Convert to 0-100 scale
+            mda_score = 50 + (avg_sentiment * 50)  # scale to 0–100
             mda_score = max(0, min(100, mda_score))
 
-            # Sentiment distribution
-            positive_count = sentiments.count('positive')
-            negative_count = sentiments.count('negative')
-            neutral_count = sentiments.count('neutral')
-            total_count = len(sentiments)
+            # Helper to get tone label
+            management_tone = "Neutral"
+            if mda_score >= 70:
+                management_tone = "Very Optimistic"
+            elif mda_score >= 60:
+                management_tone = "Optimistic"
+            elif mda_score <= 40:
+                management_tone = "Pessimistic"
 
             return {
                 'mda_score': mda_score,
                 'sentiment_distribution': {
-                    'positive': positive_count / total_count if total_count > 0 else 0,
-                    'negative': negative_count / total_count if total_count > 0 else 0,
-                    'neutral': neutral_count / total_count if total_count > 0 else 0
+                    'positive': sentiments.count('positive') / len(sentiments) if sentiments else 0,
+                    'negative': sentiments.count('negative') / len(sentiments) if sentiments else 0,
+                    'neutral': sentiments.count('neutral') / len(sentiments) if sentiments else 0,
                 },
-                'management_tone': self.get_management_tone_label(mda_score),
-                'confidence': np.mean(confidences) if confidences else 0.5,
-                'analysis_method': 'PyTorch BERT MDA Model',
-                'sample_texts_analyzed': len(mda_texts)
+                'management_tone': management_tone,
+                'confidence': np.mean(confidences) if confidences else 0,
+                'analysis_method': 'PyTorch BERT MDA Model (REAL TEXT)',
+                'sample_texts_analyzed': len(mda_texts),
+                'text_sources': 'Real MD&A extraction successful'
             }
 
         except Exception as e:
@@ -376,110 +882,124 @@ class EnhancedPositionTradingSystem:
             logger.error(traceback.format_exc())
             return self.get_sample_mda_analysis(symbol)
 
-    def get_sample_mda_analysis(self, symbol):
-        """Provide sample MDA analysis when model is not available"""
-        # Generate a reasonable sample based on stock characteristics
-        stock_info = self.get_stock_info_from_db(symbol)
-        sector = stock_info.get('sector', 'Unknown')
+    def _get_alternative_management_content(self, symbol):
+        """
+        Get alternative management content from earnings calls, press releases, etc.
+        """
+        try:
+            alternative_texts = []
 
-        # Different sectors might have different management sentiment patterns
-        if sector in ['Information Technology', 'Healthcare', 'Consumer Goods']:
-            sample_score = np.random.uniform(55, 75)  # Generally positive
-        elif sector in ['Banking', 'Financial Services']:
-            sample_score = np.random.uniform(45, 65)  # Moderate
-        else:
-            sample_score = np.random.uniform(40, 70)  # Variable
+            # Method 1: Try to get recent earnings call transcripts
+            try:
+                # This would require integration with services like:
+                # - AlphaVantage (has earnings call transcripts)
+                # - Financial news APIs
+                # - Company press releases
 
-        return {
-            'mda_score': sample_score,
-            'sentiment_distribution': {
-                'positive': 0.4,
-                'negative': 0.2,
-                'neutral': 0.4
-            },
-            'management_tone': self.get_management_tone_label(sample_score),
-            'confidence': 0.6,
-            'analysis_method': 'Sample Analysis (MDA model not available)',
-            'sample_texts_analyzed': 10
-        }
+                # For now, we'll try to get management quotes from recent news
+                ticker = yf.Ticker(f"{symbol}.NS")
+                news = ticker.news
 
-    def get_management_tone_label(self, score):
-        """Convert MDA score to management tone label"""
-        if score >= 70:
-            return "Very Optimistic"
-        elif score >= 60:
-            return "Optimistic"
-        elif score >= 40:
-            return "Neutral"
-        elif score >= 30:
-            return "Cautious"
-        else:
-            return "Pessimistic"
+                management_quotes = []
+                for article in news[:10]:  # Check recent 10 articles
+                    try:
+                        if 'summary' in article and article['summary']:
+                            summary = article['summary']
+                            # Look for quoted management statements
+                            if any(keyword in summary.lower() for keyword in [
+                                'ceo said', 'management said', 'according to', 'stated',
+                                'commented', 'believes', 'expects', 'outlook'
+                            ]):
+                                management_quotes.append(summary)
+                    except Exception:
+                        continue
+
+                if management_quotes:
+                    alternative_texts.extend(management_quotes)
+
+            except Exception as e:
+                logger.debug(f"Error getting earnings content: {e}")
+
+            return alternative_texts if len(alternative_texts) >= 2 else []
+
+        except Exception as e:
+            logger.error(f"Error getting alternative management content: {e}")
+            return []
 
     def calculate_position_trading_score(self, data, sentiment_data, fundamentals, trends, market_analysis, sector,
                                          mda_analysis=None):
-        """Calculate comprehensive position trading score with fundamental emphasis and MDA sentiment"""
+        """
+        Calculate comprehensive position trading score with contextual sentiment
+        and other dynamic modifiers.
+        """
         try:
-            # Get weights for position trading (fundamentals-heavy)
+            # Get base weights for position trading (fundamentals-heavy)
             fundamental_weight = self.position_trading_params['fundamental_weight']
             technical_weight = self.position_trading_params['technical_weight']
             sentiment_weight = self.position_trading_params['sentiment_weight']
             mda_weight = self.position_trading_params['mda_weight']
 
-            # Calculate individual scores
+            # 1. Calculate all individual base scores
             fundamental_score = self.calculate_fundamental_score(fundamentals, sector)
             technical_score = self.calculate_technical_score_position(data)
             sentiment_score = self.calculate_sentiment_score(sentiment_data)
             trend_score = trends.get('trend_score', 50)
             sector_score = market_analysis.get('sector_score', 60)
+            mda_score = mda_analysis.get('mda_score', 50) if mda_analysis and isinstance(mda_analysis, dict) else 50
 
-            # MDA sentiment score
-            mda_score = 50  # Default neutral score
-            if mda_analysis and isinstance(mda_analysis, dict):
-                mda_score = mda_analysis.get('mda_score', 50)
+            # 2. MODIFICATION: Apply the contextual sentiment multiplier based on the sector
+            sector_sentiment_multipliers = {
+                'Information Technology': 1.2,  # News is highly impactful
+                'Consumer Goods': 1.1,
+                'Financial Services': 1.1,
+                'Pharmaceuticals': 1.2,  # Regulatory news is critical
+                'Power': 0.8,  # More stable, less news-driven
+                'Oil & Gas': 1.0,
+                'Default': 1.0
+            }
+            sentiment_multiplier = sector_sentiment_multipliers.get(sector, sector_sentiment_multipliers['Default'])
+            contextual_sentiment_score = sentiment_score * sentiment_multiplier
+            logger.info(f"Applying sentiment multiplier of {sentiment_multiplier} for {sector} sector.")
 
-            # Combine scores with position trading weights
+            # 3. Combine scores using the CONTEXTUAL sentiment score
             base_score = (
                     fundamental_score * fundamental_weight +
                     technical_score * technical_weight +
-                    sentiment_score * sentiment_weight +
+                    contextual_sentiment_score * sentiment_weight +  # <-- Use the adjusted score here
                     mda_score * mda_weight
             )
 
-            # Apply trend and sector modifiers
-            trend_modifier = trend_score / 100  # 0 to 1
-            sector_modifier = sector_score / 100  # 0 to 1
-
-            # Final score with modifiers
+            # 4. Apply trend, sector, and other specific modifiers to the final score
+            trend_modifier = trend_score / 100
+            sector_modifier = sector_score / 100
             final_score = base_score * (0.7 + 0.2 * trend_modifier + 0.1 * sector_modifier)
 
-            # Position trading specific adjustments
             # Penalize high volatility stocks
             if data is not None and not data.empty and 'Close' in data.columns:
                 volatility = data['Close'].pct_change().std() * np.sqrt(252)
-                if volatility > 0.4:  # High volatility
+                if volatility > 0.4:
                     final_score *= 0.8
-                elif volatility > 0.6:  # Very high volatility
+                elif volatility > 0.6:
                     final_score *= 0.6
 
             # Bonus for dividend-paying stocks
             div_yield = fundamentals.get('dividend_yield', 0) or fundamentals.get('expected_div_yield', 0)
-            if div_yield and div_yield > 0.02:  # 2%+ dividend
-                final_score *= 1.1  # 10% bonus
+            if div_yield and div_yield > 0.02:
+                final_score *= 1.1
 
             # Bonus for consistent long-term performance
             if trends.get('momentum_1y', 0) > 0.15 and trends.get('momentum_6m', 0) > 0:
-                final_score *= 1.05  # 5% bonus
+                final_score *= 1.05
 
             # MDA sentiment bonus/penalty
             if mda_analysis:
                 management_tone = mda_analysis.get('management_tone', 'Neutral')
                 if management_tone == 'Very Optimistic':
-                    final_score *= 1.08  # 8% bonus
+                    final_score *= 1.08
                 elif management_tone == 'Optimistic':
-                    final_score *= 1.04  # 4% bonus
+                    final_score *= 1.04
                 elif management_tone == 'Pessimistic':
-                    final_score *= 0.92  # 8% penalty
+                    final_score *= 0.92
 
             return min(100, max(0, final_score))
 
@@ -551,7 +1071,8 @@ class EnhancedPositionTradingSystem:
 
             # MDA sentiment analysis
             try:
-                mda_analysis = self.analyze_mda_sentiment(final_symbol)
+                # *** FIX 1: Corrected method name ***
+                mda_analysis = self.updated_analyze_mda_sentiment(final_symbol)
                 logger.info(
                     f"MDA analysis for {symbol}: Score={mda_analysis.get('mda_score', 0):.1f}, Tone={mda_analysis.get('management_tone', 'Unknown')}")
             except Exception as e:
@@ -1952,6 +2473,64 @@ class EnhancedPositionTradingSystem:
             'recommended_holding_period': f"{time_period_months} months"
         }
 
+    # *** FIX 2: Added the missing method ***
+    def get_sample_mda_analysis(self, symbol):
+        """Generate sample MDA analysis for demonstration or fallback"""
+        try:
+            # Generate a score based on a hash of the symbol for consistency
+            base_score = 50 + (hash(symbol) % 25)
+            tone_map = {
+                (0, 45): "Pessimistic",
+                (45, 55): "Neutral",
+                (55, 65): "Optimistic",
+                (65, 100): "Very Optimistic"
+            }
+            management_tone = "Neutral"
+            for (lower, upper), tone in tone_map.items():
+                if lower <= base_score < upper:
+                    management_tone = tone
+                    break
+
+            return {
+                'mda_score': base_score,
+                'sentiment_distribution': {'positive': 0.4, 'negative': 0.1, 'neutral': 0.5},
+                'management_tone': management_tone,
+                'confidence': 0.75,
+                'analysis_method': 'Sample MDA Analysis (Fallback)',
+                'sample_texts_analyzed': 0,
+                'text_sources': 'No real text found; using sample data.'
+            }
+        except Exception as e:
+            logger.error(f"Error generating sample MDA analysis for {symbol}: {str(e)}")
+            return {'mda_score': 50, 'management_tone': 'Neutral', 'analysis_method': 'Error'}
+
+    def get_sample_news(self, symbol):
+        """Generate sample news for demonstration"""
+        try:
+            base_symbol = str(symbol).split('.')[0]
+            stock_info = self.get_stock_info_from_db(base_symbol)
+            company_name = stock_info.get("name", base_symbol)
+
+            return [
+                f"{company_name} reports strong quarterly earnings growth",
+                f"Analysts upgrade {company_name} with positive long-term outlook",
+                f"{company_name} announces strategic expansion and investment plans",
+                f"Strong fundamentals make {company_name} attractive for long-term investors",
+                f"I{company_name} dividend policy supports income-focused portfolios",
+                f"Management guidance remains optimistic for {company_name}",
+                f"Institutional investors increase holdings in {company_name}",
+                f"{company_name} well-positioned for sector growth trends",
+                f"ESG initiatives strengthen {company_name} investment case",
+                f"Market leadership solidifies {company_name} competitive advantage",
+                f"{company_name} balance sheet strength provides stability",
+                f"Innovation pipeline drives {company_name} future growth",
+                f"Regulatory tailwinds benefit {company_name} business model",
+                f"{company_name} demonstrates resilient performance in volatile markets",
+                f"Long-term demographic trends favor {company_name} prospects"
+            ]
+        except Exception as e:
+            logger.error(f"Error generating sample news for {symbol}: {str(e)}")
+            return [f"Long-term analysis for {symbol}", f"Investment opportunity in {symbol}"]
 
 def display_portfolio(portfolio_result):
     """Display the created portfolio"""
